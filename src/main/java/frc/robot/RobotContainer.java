@@ -13,12 +13,17 @@
 
 package frc.robot;
 
-import edu.wpi.first.math.estimator.PoseEstimator;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import frc.robot.Constants.ControllerConstants;
+import frc.robot.Constants.RuntimeConstants;
 import frc.robot.subsystems.Drive;
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -39,11 +44,23 @@ public class RobotContainer {
       new CommandJoystick(ControllerConstants.JOYSTICK_RIGHT_PORT);
 
   // Dashboard inputs
-  // private final LoggedDashboardChooser<Command> autoChooser;
+  // private final LoggedDashboardChooser<Command> autoChooser =
+  // new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+
+  private final LoggedDashboardChooser<Command> testChooser = new LoggedDashboardChooser<>("Tests");
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     drive = new Drive();
+
+    testChooser.addOption(
+        "Test drive",
+        Commands.run(
+            () -> {
+              drive.test();
+            },
+            drive));
+
     // switch (RuntimeConstants.currentMode) {
     //   case REAL:
     //     // Real robot, instantiate hardware IO implementations
@@ -98,7 +115,7 @@ public class RobotContainer {
     //     "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
     // Configure the button bindings
-    configureJoystickBindings();
+    configureTeleopBindings();
   }
 
   /**
@@ -107,40 +124,19 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
-  private void configureJoystickBindings() {
-    // // Default command, normal field-relative drive
-    // drive.setDefaultCommand(
-    //     DriveCommands.joystickDrive(
-    //         drive,
-    //         () -> -controller.getLeftY(),
-    //         () -> -controller.getLeftX(),
-    //         () -> -controller.getRightX()));
-
-    // // Lock to 0° when A button is held
-    // controller
-    //     .a()
-    //     .whileTrue(
-    //         DriveCommands.joystickDriveAtAngle(
-    //             drive,
-    //             () -> -controller.getLeftY(),
-    //             () -> -controller.getLeftX(),
-    //             () -> new Rotation2d()));
-
-    // // Switch to X pattern when X button is pressed
-    // controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
-
-    // // Reset gyro to 0° when B button is pressed
-    // controller
-    //     .b()
-    //     .onTrue(
-    //         Commands.runOnce(
-    //                 () ->
-    //                     drive.setPose(
-    //                         new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
-    //                 drive)
-    //             .ignoringDisable(true));
+  private void configureTeleopBindings() {
+    // JoystickCommands.driveWithTurnAngular(
+    //     driveJoystick::getX, driveJoystick::getY, steerJoystick::getX, drive);
   }
 
+  public void logMetadata() {
+    Logger.recordMetadata("Event Name", DriverStation.getEventName());
+    Logger.recordMetadata("Driver Station Location", DriverStation.getLocation() + "");
+    Logger.recordMetadata("Match Number", DriverStation.getMatchNumber() + "");
+    Logger.recordMetadata("Match Type", DriverStation.getMatchType() + "");
+    Logger.recordMetadata("Replay Number", DriverStation.getReplayNumber() + "");
+    Logger.recordMetadata("Robot Mode", "" + RuntimeConstants.CURRENT_MODE);
+  }
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
