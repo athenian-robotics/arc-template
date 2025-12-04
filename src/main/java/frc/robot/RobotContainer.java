@@ -13,12 +13,13 @@
 
 package frc.robot;
 
-import edu.wpi.first.math.estimator.PoseEstimator;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.subsystems.Drive;
+import frc.robot.subsystems.LimelightSubsystem;
+import frc.robot.subsystems.Vision;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -29,6 +30,8 @@ import frc.robot.subsystems.Drive;
 public class RobotContainer {
   // -- Subsystems --
   private final Drive drive;
+  private final LimelightSubsystem limelightSubsystem;
+  private final Vision vision;
 
   // -- Controllers --
   private final CommandJoystick driveJoystick =
@@ -44,6 +47,8 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     drive = new Drive();
+    limelightSubsystem = new LimelightSubsystem();
+    vision = new Vision(limelightSubsystem);
     // switch (RuntimeConstants.currentMode) {
     //   case REAL:
     //     // Real robot, instantiate hardware IO implementations

@@ -29,6 +29,7 @@ public final class Main {
    * <p>If you change your main robot class, change the parameter type.
    */
   public static void main(String... args) {
+    System.out.println(Constants.LimelightConstants.CAMERA_NAME);
     RobotBase.startRobot(Robot::new);
   }
 }
