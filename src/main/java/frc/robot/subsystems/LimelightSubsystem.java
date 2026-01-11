@@ -18,22 +18,37 @@ import java.util.Optional;
  * measurements, and exposes the latest trusted result for downstream odometry/path-planning code.
  */
 public class LimelightSubsystem extends SubsystemBase {
-  /** Simple container for the last usable vision sample. */
+  /**
+   * Simple container for the last usable vision sample.
+   *
+   * @param pose Field-space pose returned by Limelight (Pose2d handles its own units internally).
+   * @param timestampSeconds FPGA timestamp (s) when Limelight captured the image.
+   * @param xyStdDevMeters Estimated 1σ XY translation noise (m).
+   * @param thetaStdDevRad Estimated 1σ rotation noise (rad).
+   * @param tagCount Count of AprilTags contributing to the solve.
+   * @param avgTagDistanceMeters Average distance to contributing tags (m).
+   * @param avgTagAreaPercent Average detected tag area (% of image).
+   * @param avgAmbiguityRatio Average multi-solution ambiguity (0–1, unitless).
+   * @param isMegaTag2 Whether MegaTag2 solve logic was used.
+   */
   public static record VisionObservation(
-      Pose2d poseMeters,
+      Pose2d pose,
       double timestampSeconds,
       double xyStdDevMeters,
       double thetaStdDevRad,
       int tagCount,
-      double avgTagDistance,
-      double avgTagArea,
-      double avgAmbiguity,
+      double avgTagDistanceMeters,
+      double avgTagAreaPercent,
+      double avgAmbiguityRatio,
       boolean isMegaTag2) {}
 
   private VisionObservation latestObservation;
-  private double lastHeartbeat = 0.0;
+  /** FPGA timestamp seconds when the last trusted observation arrived. */
+  private double lastHeartbeatSeconds = 0.0;
+  /** FPGA timestamp seconds when we last printed a console update. */
   private double lastConsoleReportSeconds = 0.0;
-  private static final double CONSOLE_REPORT_INTERVAL = 1.0;
+  /** Minimum interval (s) between console pose prints to avoid spamming logs. */
+  private static final double CONSOLE_REPORT_INTERVAL_SECONDS = 1.0;
 
   @Override
   public void periodic() {
@@ -59,7 +74,7 @@ public class LimelightSubsystem extends SubsystemBase {
             estimate.avgTagArea,
             avgAmbiguity,
             estimate.isMegaTag2);
-    lastHeartbeat = Timer.getFPGATimestamp();
+    lastHeartbeatSeconds = Timer.getFPGATimestamp();
     reportObservation(latestObservation);
   }
 
@@ -70,12 +85,13 @@ public class LimelightSubsystem extends SubsystemBase {
 
   /** Returns the cached pose if present. */
   public Optional<Pose2d> getLatestPose() {
-    return getLatestObservation().map(VisionObservation::poseMeters);
+    return getLatestObservation().map(VisionObservation::pose);
   }
 
   /** Whether a measurement has been produced recently. */
   public boolean hasFreshObservation(double maxAgeSeconds) {
-    return latestObservation != null && (Timer.getFPGATimestamp() - lastHeartbeat) <= maxAgeSeconds;
+    return latestObservation != null
+        && (Timer.getFPGATimestamp() - lastHeartbeatSeconds) <= maxAgeSeconds;
   }
 
   /** Convenience wrappers for future commands. */
@@ -91,6 +107,12 @@ public class LimelightSubsystem extends SubsystemBase {
     }
   }
 
+  /**
+   * Samples the alliance-specific Limelight MegaTag2 pose solve.
+   *
+   * <p>Limelight reports field coordinates relative to the selected alliance; this helper selects
+   * the appropriate center point before returning the raw estimate for downstream validation.
+   */
   private PoseEstimate sampleEstimate() {
     Optional<Alliance> alliance = DriverStation.getAlliance();
     if (alliance.isPresent() && alliance.get() == Alliance.Red) {
@@ -127,7 +149,7 @@ public class LimelightSubsystem extends SubsystemBase {
     double tagCountFactor = Math.max(1.0, estimate.tagCount);
     double distanceFactor =
         estimate.avgTagDist <= 0.0
-            ? 1.0
+            ? 1.0 // Happens if Limelight cannot compute a reliable range from the inputs.
             : Math.max(
                 1.0,
                 estimate.avgTagDist / Constants.LimelightConstants.DISTANCE_TRUST_FALLOFF_METERS);
@@ -150,11 +172,11 @@ public class LimelightSubsystem extends SubsystemBase {
   @SuppressWarnings("PMD.AvoidPrintStackTrace")
   private String reportObservation(VisionObservation observation) {
     double now = Timer.getFPGATimestamp();
-    if (now - lastConsoleReportSeconds < CONSOLE_REPORT_INTERVAL) {
+    if (now - lastConsoleReportSeconds < CONSOLE_REPORT_INTERVAL_SECONDS) {
       return "";
     }
     lastConsoleReportSeconds = now;
-    Pose2d pose = observation.poseMeters();
+    Pose2d pose = observation.pose();
     return ("Limelight pose: (%.2fm, %.2fm @ %.1f°), tags=%d, STD_xy=%.2fm, STD_theta=%.1f°%n"
             + " "
             + pose.getTranslation().getX()

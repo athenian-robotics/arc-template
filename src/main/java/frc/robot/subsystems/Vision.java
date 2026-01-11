@@ -30,8 +30,8 @@ public class Vision extends SubsystemBase {
 
     return limelightSubsystem
         .getLatestObservation()
-        .filter(observation -> measurementMatchesOdometry(estimatedPose, observation.poseMeters()))
-        .map(LimelightSubsystem.VisionObservation::poseMeters);
+        .filter(observation -> measurementMatchesOdometry(estimatedPose, observation.pose()))
+        .map(LimelightSubsystem.VisionObservation::pose);
   }
 
   private boolean measurementMatchesOdometry(Pose2d reference, Pose2d measurement) {
