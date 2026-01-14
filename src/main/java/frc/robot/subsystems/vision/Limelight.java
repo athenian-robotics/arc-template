@@ -103,6 +103,11 @@ public class Limelight extends SubsystemBase {
     }
   }
 
+  public void setRobotOrientation(double yaw, double yawRate) {
+    LimelightHelpers.SetRobotOrientation_NoFlush(
+        Constants.LimelightConstants.CAMERA_NAME, yaw, yawRate, 0, 0, 0, 0);
+  }
+
   /**
    * Samples the alliance-specific Limelight MegaTag2 pose solve.
    *

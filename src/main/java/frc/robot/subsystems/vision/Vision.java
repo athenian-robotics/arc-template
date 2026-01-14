@@ -22,19 +22,31 @@ public class Vision extends SubsystemBase {
   }
 
   /**
-   * @param estimatedPose The current position, according to odometry. May be innacurate.
-   * @return Either a vision estimate of robot position from the vision sensor, or a None value if
-   *     no estimate can be made.
+   * Returns the latest vision observation, optionally filtered by a pose estimate.
+   *
+   * @param currentPose The current pose estimate to use for filtering. If null, no filtering is
+   *     applied (useful for seeding).
+   * @return The latest vision observation if valid and (optionally) matches the estimate.
    */
-  public Optional<Pose2d> findRobotPose(Pose2d estimatedPose) {
+  public Optional<Limelight.VisionObservation> getVisionObservation(Pose2d currentPose) {
     if (!limelight.hasFreshObservation(0.5)) {
       return Optional.empty();
     }
 
     return limelight
         .getLatestObservation()
-        .filter(observation -> measurementMatchesOdometry(estimatedPose, observation.pose()))
-        .map(Limelight.VisionObservation::pose);
+        .filter(
+            observation -> {
+              if (currentPose == null) {
+                return true;
+              }
+              return measurementMatchesOdometry(currentPose, observation.pose());
+            });
+  }
+
+  public void setRobotOrientation(Rotation2d rotation, double yawVelocityRadPerSec) {
+    limelight.setRobotOrientation(
+        rotation.getDegrees(), Units.radiansToDegrees(yawVelocityRadPerSec));
   }
 
   private boolean measurementMatchesOdometry(Pose2d reference, Pose2d measurement) {

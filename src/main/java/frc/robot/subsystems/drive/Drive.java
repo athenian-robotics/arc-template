@@ -28,6 +28,7 @@ import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -49,6 +50,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.RuntimeConstants;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.vision.Limelight;
+import frc.robot.subsystems.vision.Vision;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -86,6 +89,7 @@ public class Drive extends SubsystemBase {
           getModuleTranslations());
 
   static final Lock odometryLock = new ReentrantLock();
+  private final Vision vision;
   private final GyroIO gyroIO;
   private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
   private final Module[] modules = new Module[4]; // FL, FR, BL, BR
@@ -106,11 +110,13 @@ public class Drive extends SubsystemBase {
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
 
   public Drive(
+      Vision vision,
       GyroIO gyroIO,
       ModuleIO flModuleIO,
       ModuleIO frModuleIO,
       ModuleIO blModuleIO,
       ModuleIO brModuleIO) {
+    this.vision = vision;
     this.gyroIO = gyroIO;
     modules[0] = new Module(flModuleIO, 0, TunerConstants.FrontLeft);
     modules[1] = new Module(frModuleIO, 1, TunerConstants.FrontRight);
@@ -210,6 +216,18 @@ public class Drive extends SubsystemBase {
 
       // Apply update
       poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
+    }
+
+    // Update vision
+    vision.setRobotOrientation(getRotation(), gyroInputs.yawVelocityRadPerSec);
+    var visionObservation = vision.getVisionObservation(getPose());
+    if (visionObservation.isPresent()) {
+      var obs = visionObservation.get();
+      addVisionMeasurement(
+          obs.pose(),
+          obs.timestampSeconds(),
+          VecBuilder.fill(obs.xyStdDevMeters(), obs.xyStdDevMeters(), obs.thetaStdDevRad()));
+      Logger.recordOutput("Odometry/VisionObservation/TagDistance", obs.avgTagDistanceMeters());
     }
 
     // Update gyro alert
