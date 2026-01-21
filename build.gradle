@@ -65,6 +65,13 @@ task(replayWatch, type: JavaExec) {
 
 // Defining my dependencies. In this case, WPILib (+ friends), and vendor libraries.
 // Also defines JUnit 5.
+repositories {
+    mavenCentral()
+    maven {
+        url = uri("https://frcmaven.wpi.edu/artifactory/release")
+    }
+}
+
 dependencies {
     annotationProcessor wpi.java.deps.wpilibAnnotations()
     implementation wpi.java.deps.wpilib()

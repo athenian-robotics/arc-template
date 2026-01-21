@@ -45,6 +45,8 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -108,6 +110,8 @@ public class Drive extends SubsystemBase {
       };
   private SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
+  private final Field2d field = new Field2d();
+
 
   public Drive(
       Vision vision,
@@ -161,6 +165,8 @@ public class Drive extends SubsystemBase {
                 (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
             new SysIdRoutine.Mechanism(
                 (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
+
+    SmartDashboard.putData("Field", field);
   }
 
   @Override
@@ -228,7 +234,13 @@ public class Drive extends SubsystemBase {
           obs.timestampSeconds(),
           VecBuilder.fill(obs.xyStdDevMeters(), obs.xyStdDevMeters(), obs.thetaStdDevRad()));
       Logger.recordOutput("Odometry/VisionObservation/TagDistance", obs.avgTagDistanceMeters());
+      field.getObject("Vision").setPose(obs.pose());
+    } else {
+      field.getObject("Vision").setPose(new Pose2d(-100, -100, new Rotation2d()));
     }
+
+    // Update Field2d
+    field.setRobotPose(getPose());
 
     // Update gyro alert
     gyroDisconnectedAlert.set(

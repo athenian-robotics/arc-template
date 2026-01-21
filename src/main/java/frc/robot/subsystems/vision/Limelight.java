@@ -48,13 +48,37 @@ public class Limelight extends SubsystemBase {
 
   @Override
   public void periodic() {
+    if (Constants.RuntimeConstants.currentMode == Constants.RuntimeConstants.Mode.SIM) {
+      Logger.recordOutput("Limelight/Warning/IsSim", true);
+    }
+
     PoseEstimate estimate = sampleEstimate();
-    if (!isEstimateUsable(estimate)) {
+    // LimelightHelpers returns null if the array is missing/empty (not connected).
+    boolean connected = estimate != null;
+    Logger.recordOutput("Limelight/Connected", connected);
+
+    // Check if Limelight sees any target (TV) even if solve failed
+    boolean hasTarget = LimelightHelpers.getTV(Constants.LimelightConstants.CAMERA_NAME);
+    Logger.recordOutput("Limelight/HasTarget", hasTarget);
+
+    if (!connected) {
+      Logger.recordOutput("Limelight/IsUsable", false);
+      Logger.recordOutput("Limelight/RawTagCount", 0);
+      Logger.recordOutput("Limelight/AvgAmbiguity", 0.0);
       return;
     }
 
+    Logger.recordOutput("Limelight/RawTagCount", estimate.tagCount);
     double avgAmbiguity = computeAverageAmbiguity(estimate);
+    Logger.recordOutput("Limelight/AvgAmbiguity", avgAmbiguity);
+
+    boolean usable = isEstimateUsable(estimate);
     if (avgAmbiguity > Constants.LimelightConstants.MAX_POSE_AMBIGUITY) {
+      usable = false;
+    }
+    Logger.recordOutput("Limelight/IsUsable", usable);
+
+    if (!usable) {
       return;
     }
 
