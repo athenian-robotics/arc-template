@@ -59,7 +59,7 @@ public class Constants {
     public static final int MAINHAND_BOTTOM_MIDDLE = 15;
     public static final int MAINHAND_BOTTOM_RIGHT = 16;
 
-    public static final double HEADING_DEADZONE = 0.02
+    public static final double HEADING_DEADZONE = 0.02;
   }
 
   public final class DrivetrainConstants {

@@ -135,7 +135,8 @@ public class DriveCommands {
         Set<Subsystem> requirements = new HashSet<>();
         requirements.add(drive);
         return requirements;
-      };
+      }
+      ;
 
       @Override
       public void execute() {
@@ -171,14 +172,14 @@ public class DriveCommands {
     }
     // Reset PID controller when command starts
     .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
-}
+  }
 
   public static Command joystickDriveAtAngle(
       Drive drive,
       DoubleSupplier xSupplier,
       DoubleSupplier ySupplier,
       Supplier<Rotation2d> rotationSupplier) {
-    return joystickDriveAtAngle(drive, xSupplier, ySupplier, rotationSupplier, ()->true);
+    return joystickDriveAtAngle(drive, xSupplier, ySupplier, rotationSupplier, () -> true);
   }
 
   /**
