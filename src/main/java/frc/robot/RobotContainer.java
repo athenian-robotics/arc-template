@@ -28,8 +28,9 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
-import frc.robot.subsystems.vision.Limelight;
 import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionIO;
+import frc.robot.subsystems.vision.VisionIOLimelight;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -41,7 +42,6 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // -- Subsystems --
   private final Drive drive;
-  private final Limelight limelight;
   private final Vision vision;
 
   // -- Controllers --
@@ -57,11 +57,10 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    limelight = new Limelight();
-    vision = new Vision(limelight);
     switch (RuntimeConstants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
+        vision = new Vision(new VisionIOLimelight());
         drive =
             new Drive(
                 vision,
@@ -74,6 +73,7 @@ public class RobotContainer {
 
       case SIM:
         // Sim robot, instantiate physics sim IO implementations
+        vision = new Vision(new VisionIO() {});
         drive =
             new Drive(
                 vision,
@@ -86,6 +86,7 @@ public class RobotContainer {
 
       default:
         // Replayed robot, disable IO implementations
+        vision = new Vision(new VisionIO() {});
         drive =
             new Drive(
                 vision,

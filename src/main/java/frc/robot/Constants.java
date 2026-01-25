@@ -72,7 +72,7 @@ public class Constants {
   public static final class LimelightConstants {
     /** NetworkTables name configured on the camera. */
     public static final String CAMERA_NAME =
-        "limelight"; // TODO: match the camera's NT name on the robot.
+        "limelight";
 
     /**
      * Transform from the robot origin (center of rotation on the floor) to the camera pose. The
