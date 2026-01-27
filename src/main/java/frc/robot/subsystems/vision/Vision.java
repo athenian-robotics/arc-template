@@ -10,9 +10,12 @@ import frc.robot.Constants;
 import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 
-/** The subsystem for handling vision. */
+/** Subsystem shell that limits and validates pose updates from vision hardware. */
 public class Vision extends SubsystemBase {
+  /** Maximum allowed pose translation error between vision and odometry before rejecting data. */
   private static final double MAX_TRANSLATION_ERROR_METERS = 2.0;
+
+  /** Maximum allowed rotation error (radians) between vision and odometry before rejecting data. */
   private static final double MAX_ROTATION_ERROR_RADIANS = Units.degreesToRadians(30.0);
 
   private final VisionIO io;
@@ -20,17 +23,28 @@ public class Vision extends SubsystemBase {
   private VisionObservation latestObservation;
   private double lastHeartbeatSeconds = 0.0;
 
+  /** Result of a validated Limelight solve. */
   public static record VisionObservation(
+      /** Pose of the robot in field coordinates as computed by Limelight. */
       Pose2d pose,
+      /** FPGA timestamp (seconds) captured with the snapshot. */
       double timestampSeconds,
+      /** Estimated XY measurement noise (meters). */
       double xyStdDevMeters,
+      /** Estimated yaw measurement noise (radians). */
       double thetaStdDevRad,
+      /** Number of AprilTags used in the pose solve. */
       int tagCount,
+      /** Average distance to the tags that contributed (meters). */
       double avgTagDistanceMeters,
+      /** Average tag area as a percentage of the image. */
       double avgTagAreaPercent,
+      /** Aggregate tracker ambiguity ratio (0-1). */
       double avgAmbiguityRatio,
+      /** Whether the MegaTag2 solver produced the pose. */
       boolean isMegaTag2) {}
 
+  /** Creates the vision subsystem backed by the supplied IO implementation. */
   public Vision(VisionIO io) {
     this.io = io;
   }
@@ -83,10 +97,17 @@ public class Vision extends SubsystemBase {
     return Optional.of(latestObservation);
   }
 
+  /**
+   * Updates the Limelight's notion of the robot orientation so that pose solutions remain
+   * synchronized with the gyro.
+   */
   public void setRobotOrientation(Rotation2d rotation, double yawVelocityRadPerSec) {
     io.setRobotOrientation(rotation.getDegrees(), Units.radiansToDegrees(yawVelocityRadPerSec));
   }
 
+  /**
+   * Returns true if the measurement falls within the permitted translation and rotation window.
+   */
   private boolean measurementMatchesOdometry(Pose2d reference, Pose2d measurement) {
     Translation2d delta = reference.getTranslation().minus(measurement.getTranslation());
     Rotation2d rotationDelta = reference.getRotation().minus(measurement.getRotation());
@@ -94,10 +115,19 @@ public class Vision extends SubsystemBase {
         && Math.abs(rotationDelta.getRadians()) <= MAX_ROTATION_ERROR_RADIANS;
   }
 
+  /**
+   * Determines whether a cached observation is still recent enough to use.
+   */
   private boolean hasFreshObservation(double maxAgeSeconds) {
     return latestObservation != null
         && (Timer.getFPGATimestamp() - lastHeartbeatSeconds) <= maxAgeSeconds;
   }
+
+  /**
+   * Filters pose updates before caching them locally.
+   *
+   * @return true when the raw vision inputs meet the configured thresholds.
+   */
   private boolean isEstimateUsable(VisionIOInputsAutoLogged inputs) {
     if (inputs.tagCount < Constants.LimelightConstants.MIN_TAG_COUNT) {
       return false;
