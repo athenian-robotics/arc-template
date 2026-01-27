@@ -47,7 +47,8 @@ public class DriveCommands {
 
   private static Translation2d getLinearVelocityFromJoysticks(double x, double y) {
     // Apply deadband
-    double linearMagnitude = MathUtil.applyDeadband(Math.hypot(x, y), Constants.DriveCommandsConstants.DEADBAND);
+    double linearMagnitude =
+        MathUtil.applyDeadband(Math.hypot(x, y), Constants.DriveCommandsConstants.DEADBAND);
     Rotation2d linearDirection = new Rotation2d(Math.atan2(y, x));
 
     // Square magnitude for more precise control
@@ -74,7 +75,9 @@ public class DriveCommands {
               getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
 
           // Apply rotation deadband
-          double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), Constants.DriveCommandsConstants.DEADBAND);
+          double omega =
+              MathUtil.applyDeadband(
+                  omegaSupplier.getAsDouble(), Constants.DriveCommandsConstants.DEADBAND);
 
           // Square rotation value for more precise control
           omega = Math.copySign(omega * omega, omega);
@@ -116,7 +119,9 @@ public class DriveCommands {
             Constants.DriveCommandsConstants.ANGLE_KP,
             0.0,
             Constants.DriveCommandsConstants.ANGLE_KD,
-            new TrapezoidProfile.Constraints(Constants.DriveCommandsConstants.ANGLE_MAX_VELOCITY, Constants.DriveCommandsConstants.ANGLE_MAX_ACCELERATION));
+            new TrapezoidProfile.Constraints(
+                Constants.DriveCommandsConstants.ANGLE_MAX_VELOCITY,
+                Constants.DriveCommandsConstants.ANGLE_MAX_ACCELERATION));
     angleController.enableContinuousInput(-Math.PI, Math.PI);
 
     // Construct command
@@ -239,7 +244,8 @@ public class DriveCommands {
 
   /** Measures the robot's wheel radius by spinning in a circle. */
   public static Command wheelRadiusCharacterization(Drive drive) {
-    SlewRateLimiter limiter = new SlewRateLimiter(Constants.DriveCommandsConstants.WHEEL_RADIUS_RAMP_RATE);
+    SlewRateLimiter limiter =
+        new SlewRateLimiter(Constants.DriveCommandsConstants.WHEEL_RADIUS_RAMP_RATE);
     WheelRadiusCharacterizationState state = new WheelRadiusCharacterizationState();
 
     return Commands.parallel(
@@ -254,7 +260,8 @@ public class DriveCommands {
             // Turn in place, accelerating up to full speed
             Commands.run(
                 () -> {
-                  double speed = limiter.calculate(Constants.DriveCommandsConstants.WHEEL_RADIUS_MAX_VELOCITY);
+                  double speed =
+                      limiter.calculate(Constants.DriveCommandsConstants.WHEEL_RADIUS_MAX_VELOCITY);
                   drive.runVelocity(new ChassisSpeeds(0.0, 0.0, speed));
                 },
                 drive)),
