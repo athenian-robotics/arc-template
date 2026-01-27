@@ -124,7 +124,7 @@ public class DriveCommands {
                 Constants.DriveCommandsConstants.ANGLE_MAX_ACCELERATION));
     angleController.enableContinuousInput(-Math.PI, Math.PI);
 
-    // Construct command
+    // Has to override Command to allow statefulness with the command, enabling heading control to optionally not update the orientation
     return new Command() {
       Rotation2d lastJoystickAngle = new Rotation2d();
 

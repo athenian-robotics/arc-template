@@ -119,21 +119,22 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureJoystickBindings() {
-    // // Default command, normal field-relative drive
-    // drive.setDefaultCommand(
-    //     DriveCommands.joystickDrive(
-    //         drive,
-    //         () -> -driveJoystick.getY(),
-    //         () -> -driveJoystick.getX(),
-    //         () -> -steerJoystick.getX()));
-
+    // Default command, normal field-relative drive
     drive.setDefaultCommand(
-        DriveCommands.joystickDriveAtAngle(
+        DriveCommands.joystickDrive(
             drive,
-            () -> driveJoystick.getY(),
-            () -> driveJoystick.getX(),
-            () -> new Rotation2d(-steerJoystick.getY(), -steerJoystick.getX()),
-            () -> steerJoystick.getMagnitude() >= Constants.ControllerConstants.HEADING_DEADZONE));
+            () -> -driveJoystick.getY(),
+            () -> -driveJoystick.getX(),
+            () -> -steerJoystick.getX()));
+
+    // This allows for heading-based drive
+    // drive.setDefaultCommand(
+    //     DriveCommands.joystickDriveAtAngle(
+    //         drive,
+    //         () -> driveJoystick.getY(),
+    //         () -> driveJoystick.getX(),
+    //         () -> new Rotation2d(-steerJoystick.getY(), -steerJoystick.getX()),
+    //         () -> steerJoystick.getMagnitude() >= Constants.ControllerConstants.HEADING_DEADZONE));
 
     // // Lock to 0° when A button is held
     // controller
