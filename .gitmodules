@@ -1,0 +1,3 @@
+[submodule "src/lib/LimelightHelpers/frc/robot"]
+	path = src/lib/LimelightHelpers/frc/robot
+	url = https://github.com/LimelightVision/limelightlib-wpijava.git

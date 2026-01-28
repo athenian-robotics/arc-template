@@ -1,5 +1,4 @@
 {
-  "java.configuration.updateBuildConfiguration": "automatic",
   "java.server.launchMode": "Standard",
   "files.exclude": {
     "**/.git": true,
@@ -18,15 +17,19 @@
     {
       "name": "WPIlibUnitTests",
       "workingDirectory": "${workspaceFolder}/build/jni/release",
-      "vmargs": [ "-Djava.library.path=${workspaceFolder}/build/jni/release" ],
+      "vmargs": [
+        "-Djava.library.path=${workspaceFolder}/build/jni/release"
+      ],
       "env": {
-        "LD_LIBRARY_PATH": "${workspaceFolder}/build/jni/release" ,
+        "LD_LIBRARY_PATH": "${workspaceFolder}/build/jni/release",
         "DYLD_LIBRARY_PATH": "${workspaceFolder}/build/jni/release"
       }
     },
+    null
   ],
   "java.test.defaultConfig": "WPIlibUnitTests",
-  "java.import.gradle.annotationProcessing.enabled": false,
+  "spotlessGradle.format.enable": true,
+  "spotlessGradle.diagnostics.enable": false,
   "java.completion.favoriteStaticMembers": [
     "org.junit.Assert.*",
     "org.junit.Assume.*",
@@ -55,7 +58,15 @@
     "javax.smartcardio.*",
     "edu.wpi.first.math.proto.*",
     "edu.wpi.first.math.**.proto.*",
-    "edu.wpi.first.math.**.struct.*",
+    "edu.wpi.first.math.**.struct.*"
   ],
-  "java.dependency.enableDependencyCheckup": false
+  "editor.defaultFormatter": "richardwillis.vscode-spotless-gradle",
+  "[json]": {
+    "editor.defaultFormatter": "richardwillis.vscode-spotless-gradle"
+  },
+  "[java]": {
+    "editor.defaultFormatter": "redhat.java"
+  },
+  "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx4G -Xms100m -Xlog:disable",
+  "java.configuration.updateBuildConfiguration": "automatic"
 }
