@@ -134,7 +134,7 @@ public class Vision extends SubsystemBase {
    * @return true when the raw vision inputs meet the configured thresholds.
    */
   private boolean isEstimateUsable(VisionIOInputsAutoLogged inputs) {
-    return (inputs.tagCount >= Constants.LimelightConstants.MIN_TAG_COUNT && inputs.avgAmbiguity > Constants.LimelightConstants.MAX_POSE_AMBIGUITY);
+    return (inputs.tagCount >= Constants.LimelightConstants.MIN_TAG_COUNT && inputs.avgAmbiguity <= Constants.LimelightConstants.MAX_POSE_AMBIGUITY);
   }
 
   public void setOverrideOdometry(boolean value){
