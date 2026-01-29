@@ -12,16 +12,12 @@ import org.littletonrobotics.junction.Logger;
 
 /** Subsystem shell that limits and validates pose updates from vision hardware. */
 public class Vision extends SubsystemBase {
-  /** Maximum allowed pose translation error between vision and odometry before rejecting data. */
-  private static final double MAX_TRANSLATION_ERROR_METERS = 2.0;
-
-  /** Maximum allowed rotation error (radians) between vision and odometry before rejecting data. */
-  private static final double MAX_ROTATION_ERROR_RADIANS = Units.degreesToRadians(30.0);
-
   private final VisionIO io;
   private final VisionIOInputsAutoLogged inputs = new VisionIOInputsAutoLogged();
   private VisionObservation latestObservation;
   private double lastHeartbeatSeconds = 0.0;
+  private boolean overrideOdometry = false;
+
 
   /** Result of a validated Limelight solve. */
   public static record VisionObservation(
@@ -78,7 +74,7 @@ public class Vision extends SubsystemBase {
    * @return The latest vision observation if valid and (optionally) matches the estimate.
    */
   public Optional<VisionObservation> getVisionObservation(Pose2d currentPose) {
-    if (!hasFreshObservation(0.5)) {
+    if (!hasFreshObservation(Constants.LimelightConstants.FRESH_OBSERVATION_THRESHOLD)) {
       Logger.recordOutput("Vision/HasFreshObservation", false);
       return Optional.empty();
     }
@@ -88,11 +84,18 @@ public class Vision extends SubsystemBase {
       return Optional.empty();
     }
 
-    if (currentPose != null && !measurementMatchesOdometry(currentPose, latestObservation.pose())) {
+    if (currentPose != null && !overrideOdometry && !measurementMatchesOdometry(currentPose, latestObservation.pose())) {
       Logger.recordOutput("Vision/RejectedByOdometry", true);
       return Optional.empty();
     }
     Logger.recordOutput("Vision/RejectedByOdometry", false);
+
+    if (overrideOdometry) {
+      overrideOdometry = false;
+      Logger.recordOutput("Vision/overrideOdometryCheck", true);
+    } else {
+      Logger.recordOutput("Vision/overrideOdometryCheck", false);
+    }
 
     return Optional.of(latestObservation);
   }
@@ -100,6 +103,8 @@ public class Vision extends SubsystemBase {
   /**
    * Updates the Limelight's notion of the robot orientation so that pose solutions remain
    * synchronized with the gyro.
+   * @param rotation the current accurate rotation
+   * @param yawVelocityRadPerSec the current accurate (yaw) rotation speed
    */
   public void setRobotOrientation(Rotation2d rotation, double yawVelocityRadPerSec) {
     io.setRobotOrientation(rotation.getDegrees(), Units.radiansToDegrees(yawVelocityRadPerSec));
@@ -111,8 +116,8 @@ public class Vision extends SubsystemBase {
   private boolean measurementMatchesOdometry(Pose2d reference, Pose2d measurement) {
     Translation2d delta = reference.getTranslation().minus(measurement.getTranslation());
     Rotation2d rotationDelta = reference.getRotation().minus(measurement.getRotation());
-    return delta.getNorm() <= MAX_TRANSLATION_ERROR_METERS
-        && Math.abs(rotationDelta.getRadians()) <= MAX_ROTATION_ERROR_RADIANS;
+    return delta.getNorm() <= Constants.LimelightConstants.MAX_TRANSLATION_ERROR_METERS
+        && Math.abs(rotationDelta.getRadians()) <= Constants.LimelightConstants.MAX_ROTATION_ERROR_RADIANS;
   }
 
   /**
@@ -129,12 +134,10 @@ public class Vision extends SubsystemBase {
    * @return true when the raw vision inputs meet the configured thresholds.
    */
   private boolean isEstimateUsable(VisionIOInputsAutoLogged inputs) {
-    if (inputs.tagCount < Constants.LimelightConstants.MIN_TAG_COUNT) {
-      return false;
-    }
-    if (inputs.avgAmbiguity > Constants.LimelightConstants.MAX_POSE_AMBIGUITY) {
-      return false;
-    }
-    return true;
+    return (inputs.tagCount >= Constants.LimelightConstants.MIN_TAG_COUNT && inputs.avgAmbiguity <= Constants.LimelightConstants.MAX_POSE_AMBIGUITY);
+  }
+
+  public void setOverrideOdometry(boolean value){
+    overrideOdometry = value;
   }
 }

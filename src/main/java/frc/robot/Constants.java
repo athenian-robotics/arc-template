@@ -111,6 +111,15 @@ public class Constants {
     /** Distance where we start to inflate std devs significantly (meters). */
     public static final double DISTANCE_TRUST_FALLOFF_METERS =
         4.5; // Tune to how vision accuracy drops off with range.
+
+    /** Maximum allowed pose translation error between vision and odometry before rejecting data. */
+    public static final double MAX_TRANSLATION_ERROR_METERS = 2.0;
+
+    /** Maximum allowed rotation error (radians) between vision and odometry before rejecting data. */
+    public static final double MAX_ROTATION_ERROR_RADIANS = Units.degreesToRadians(30.0);
+
+    /** The maximum time before an observation is no longer considered fresh (seconds). */
+    public static final double FRESH_OBSERVATION_THRESHOLD = 0.5;
   }
 
   public final class DriveCommandsConstants {
