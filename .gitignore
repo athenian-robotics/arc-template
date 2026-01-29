@@ -173,6 +173,12 @@ networktables.json
 simgui.json
 *-window.json
 
+# useful-repo
+useful-repo/
+
+# docs
+docs/
+
 # Simulation data log directory
 logs/
 
