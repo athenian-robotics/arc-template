@@ -24,6 +24,7 @@ public class IndexerIOTalonFX implements IndexerIO {
 
     @Override
     public void setVoltage(Voltage voltage) {
+        appliedVoltage = voltage;
         motor.setControl(new VoltageOut(voltage));
     }
     
