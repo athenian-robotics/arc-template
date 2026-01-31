@@ -124,7 +124,8 @@ public class DriveCommands {
                 Constants.DriveCommandsConstants.ANGLE_MAX_ACCELERATION));
     angleController.enableContinuousInput(-Math.PI, Math.PI);
 
-    // Has to override Command to allow statefulness with the command, enabling heading control to optionally not update the orientation
+    // Has to override Command to allow statefulness with the command, enabling heading control to
+    // optionally not update the orientation
     return new Command() {
       Rotation2d lastJoystickAngle = new Rotation2d();
 
@@ -141,34 +142,34 @@ public class DriveCommands {
           lastJoystickAngle = rotationSupplier.get();
         }
 
-              // Get linear velocity
-              Translation2d linearVelocity =
-                  getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
+        // Get linear velocity
+        Translation2d linearVelocity =
+            getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
 
-              // Calculate angular speed
-              double omega =
-                  angleController.calculate(
+        // Calculate angular speed
+        double omega =
+            angleController.calculate(
                 drive.getRotation().getRadians(), lastJoystickAngle.getRadians());
 
-              // Convert to field relative speeds & send command
-              ChassisSpeeds speeds =
-                  new ChassisSpeeds(
-                      linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
-                      linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
-                      omega);
-              boolean isFlipped =
-                  DriverStation.getAlliance().isPresent()
-                      && DriverStation.getAlliance().get() == Alliance.Red;
-              drive.runVelocity(
-                  ChassisSpeeds.fromFieldRelativeSpeeds(
-                      speeds,
-                      isFlipped
-                          ? drive.getRotation().plus(new Rotation2d(Math.PI))
-                          : drive.getRotation()));
+        // Convert to field relative speeds & send command
+        ChassisSpeeds speeds =
+            new ChassisSpeeds(
+                linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
+                linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
+                omega);
+        boolean isFlipped =
+            DriverStation.getAlliance().isPresent()
+                && DriverStation.getAlliance().get() == Alliance.Red;
+        drive.runVelocity(
+            ChassisSpeeds.fromFieldRelativeSpeeds(
+                speeds,
+                isFlipped
+                    ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                    : drive.getRotation()));
       }
     }
-        // Reset PID controller when command starts
-        .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
+    // Reset PID controller when command starts
+    .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
   }
 
   public static Command joystickDriveAtAngle(
