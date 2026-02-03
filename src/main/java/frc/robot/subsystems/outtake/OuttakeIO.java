@@ -1,5 +1,6 @@
 package frc.robot.subsystems.outtake;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import org.littletonrobotics.junction.AutoLog;
@@ -31,6 +32,9 @@ public interface OuttakeIO extends Subsystem {
   /** Causes the "intake" wheel to spin using specified voltage */
   public void setIntakeVoltage(double voltage);
 
-  /** Sets the target hood angle, which the hood will constantly move towards */
-  public void setTargetHoodAngle(double angleDegrees);
+  /** Sets the target shot angle, which the hood will constantly move towards, to be targeting the target */
+  public void setAngleAtTarget(Translation2d currentPosition);
+
+  /** Sets the target shot angle, which the hood will constantly move towards, measured ccw+ from horiontal */
+  public void setAngle(double angleDegrees);
 }

@@ -3,6 +3,7 @@ package frc.robot;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -92,5 +93,12 @@ public class Constants {
     public static final double MINIMUM_SHOT_ANGLE_DEG = 0.0;
     public static final double MAXIMUM_SHOT_ANGLE_DEG = 0.0;
     public static final double STARTING_SHOT_ANGLE_DEG = 0.0;
+    public static final double MIDFIELD_SHOT_ANGLE_DEG = 0.0;
+    public static final double OPPOSITE_TEAM_SHOT_ANGLE_DEG = 0.0;
+
+    public static final double MIDFIELD_LIMIT_FEET = 0.0;
+    public static final double OPPOSITE_TEAM_LIMIT_FEET = 0.0;
+
+    public static final Translation2d HUB_POSITION = new Translation2d();
   }
 }

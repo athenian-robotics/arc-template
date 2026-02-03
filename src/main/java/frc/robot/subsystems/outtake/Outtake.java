@@ -2,6 +2,7 @@ package frc.robot.subsystems.outtake;
 
 import static edu.wpi.first.units.Units.Volts;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -28,8 +29,17 @@ public class Outtake extends SubsystemBase {
    * @return Returns a StartEndCommand that starts spinning the flywheel and stops spinning the
    *     flywheel when the command ends.
    */
-  public Command startFlywheel() {
-    return new InstantCommand(io::startFlywheel);
+  public Command enterShootMode(Translation2d currentPosition) {
+    return new InstantCommand(io::startFlywheel).andThen(new InstantCommand(() -> io.setAngleAtTarget(currentPosition)));
+  }
+
+  /**
+   * Starts the flywheel and angles the hood according to the parameter
+   * @param shotAngleDeg The angle at which the ball will exit the shooter ccw+ from horizontal
+   * @return The command
+   */
+  public Command enterShootMode(double shotAngleDeg) {
+    return new InstantCommand(io::startFlywheel).andThen(new InstantCommand(() -> io.setAngle(shotAngleDeg)));
   }
 
   public Command stopFlywheel() {

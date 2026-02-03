@@ -1,5 +1,6 @@
 package frc.robot.subsystems.outtake;
 
+import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
@@ -9,6 +10,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -26,7 +28,7 @@ public class OuttakeIOTalonFX extends SubsystemBase implements OuttakeIO {
     logs = new OuttakeIOInputs();
     leftShooter = new TalonFX(OuttakeConstants.LEFT_SHOOTER_MOTOR);
     rightShooter = new TalonFX(OuttakeConstants.RIGHT_SHOOTER_MOTOR);
-    
+
     leftShooter.setControl(
         new Follower(OuttakeConstants.RIGHT_SHOOTER_MOTOR, MotorAlignmentValue.Opposed));
     
@@ -77,8 +79,20 @@ public class OuttakeIOTalonFX extends SubsystemBase implements OuttakeIO {
     intake.setControl(new VoltageOut(voltage));
   }
 
+  public void setAngleAtTarget(Translation2d currentPosition) {
+    if (currentPosition.getMeasureX().in(Feet) > OuttakeConstants.OPPOSITE_TEAM_LIMIT_FEET) {
+      targetShotAngleDeg = OuttakeConstants.OPPOSITE_TEAM_SHOT_ANGLE_DEG;
+      return;
+    } 
+    if (currentPosition.getMeasureX().in(Feet) > OuttakeConstants.MIDFIELD_LIMIT_FEET) {
+      targetShotAngleDeg = OuttakeConstants.MIDFIELD_SHOT_ANGLE_DEG;
+      return;
+    }
+    double shotDistanceFeet = currentPosition.getDistance(OuttakeConstants.HUB_POSITION);
+    throw new UnsupportedOperationException("We haven't yet figured out the shot angle formula");
+  }
 
-  public void setTargetHoodAngle(double angleDegrees) {
-
+  public void setAngle(double angleDegrees) {
+    targetShotAngleDeg = angleDegrees;
   }
 }
