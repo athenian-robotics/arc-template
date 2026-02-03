@@ -86,7 +86,11 @@ public class Constants {
     public static final int INTAKE_MOTOR = -1;
     public static final int ANGLE_CHANGER_MOTOR = -1;
 
-    public static final Voltage INTAKE_TO_SHOOTER = Volts.of(2);
-    public static final Voltage INTAKE_TO_GROUND = Volts.of(2);
+    public static final double INTAKE_TO_SHOOTER = 2;
+    public static final double INTAKE_TO_GROUND = 2;
+
+    public static final double MINIMUM_SHOT_ANGLE_DEG = 0.0;
+    public static final double MAXIMUM_SHOT_ANGLE_DEG = 0.0;
+    public static final double STARTING_SHOT_ANGLE_DEG = 0.0;
   }
 }
