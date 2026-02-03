@@ -145,9 +145,10 @@ public class VisionIOLimelight implements VisionIO {
             : Math.max(
                 1.0,
                 estimate.avgTagDist / Constants.LimelightConstants.DISTANCE_TRUST_FALLOFF_METERS);
-        
-        // Feels like this line shouldn't do anything but it might for some reason
-        // Math.max(1.0, estimate.avgTagDist / Constants.LimelightConstants.DISTANCE_TRUST_FALLOFF_METERS);
+
+    // Feels like this line shouldn't do anything but it might for some reason
+    // Math.max(1.0, estimate.avgTagDist /
+    // Constants.LimelightConstants.DISTANCE_TRUST_FALLOFF_METERS);
 
     double xyStd =
         Constants.LimelightConstants.SINGLE_TAG_XY_STDDEV

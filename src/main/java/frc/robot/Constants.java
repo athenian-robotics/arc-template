@@ -73,8 +73,7 @@ public class Constants {
 
   public static final class LimelightConstants {
     /** NetworkTables name configured on the camera. */
-    public static final String CAMERA_NAME =
-        "limelight";
+    public static final String CAMERA_NAME = "limelight";
 
     /**
      * Transform from the robot origin (center of rotation on the floor) to the camera pose. The
@@ -115,7 +114,9 @@ public class Constants {
     /** Maximum allowed pose translation error between vision and odometry before rejecting data. */
     public static final double MAX_TRANSLATION_ERROR_METERS = 2.0;
 
-    /** Maximum allowed rotation error (radians) between vision and odometry before rejecting data. */
+    /**
+     * Maximum allowed rotation error (radians) between vision and odometry before rejecting data.
+     */
     public static final double MAX_ROTATION_ERROR_RADIANS = Units.degreesToRadians(30.0);
 
     /** The maximum time before an observation is no longer considered fresh (seconds). */

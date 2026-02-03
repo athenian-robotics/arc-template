@@ -18,7 +18,6 @@ public class Vision extends SubsystemBase {
   private double lastHeartbeatSeconds = 0.0;
   private boolean overrideOdometry = false;
 
-
   /** Result of a validated Limelight solve. */
   public static record VisionObservation(
       /** Pose of the robot in field coordinates as computed by Limelight. */
@@ -84,7 +83,9 @@ public class Vision extends SubsystemBase {
       return Optional.empty();
     }
 
-    if (currentPose != null && !overrideOdometry && !measurementMatchesOdometry(currentPose, latestObservation.pose())) {
+    if (currentPose != null
+        && !overrideOdometry
+        && !measurementMatchesOdometry(currentPose, latestObservation.pose())) {
       Logger.recordOutput("Vision/RejectedByOdometry", true);
       return Optional.empty();
     }
@@ -103,6 +104,7 @@ public class Vision extends SubsystemBase {
   /**
    * Updates the Limelight's notion of the robot orientation so that pose solutions remain
    * synchronized with the gyro.
+   *
    * @param rotation the current accurate rotation
    * @param yawVelocityRadPerSec the current accurate (yaw) rotation speed
    */
@@ -110,19 +112,16 @@ public class Vision extends SubsystemBase {
     io.setRobotOrientation(rotation.getDegrees(), Units.radiansToDegrees(yawVelocityRadPerSec));
   }
 
-  /**
-   * Returns true if the measurement falls within the permitted translation and rotation window.
-   */
+  /** Returns true if the measurement falls within the permitted translation and rotation window. */
   private boolean measurementMatchesOdometry(Pose2d reference, Pose2d measurement) {
     Translation2d delta = reference.getTranslation().minus(measurement.getTranslation());
     Rotation2d rotationDelta = reference.getRotation().minus(measurement.getRotation());
     return delta.getNorm() <= Constants.LimelightConstants.MAX_TRANSLATION_ERROR_METERS
-        && Math.abs(rotationDelta.getRadians()) <= Constants.LimelightConstants.MAX_ROTATION_ERROR_RADIANS;
+        && Math.abs(rotationDelta.getRadians())
+            <= Constants.LimelightConstants.MAX_ROTATION_ERROR_RADIANS;
   }
 
-  /**
-   * Determines whether a cached observation is still recent enough to use.
-   */
+  /** Determines whether a cached observation is still recent enough to use. */
   private boolean hasFreshObservation(double maxAgeSeconds) {
     return latestObservation != null
         && (Timer.getFPGATimestamp() - lastHeartbeatSeconds) <= maxAgeSeconds;
@@ -134,10 +133,11 @@ public class Vision extends SubsystemBase {
    * @return true when the raw vision inputs meet the configured thresholds.
    */
   private boolean isEstimateUsable(VisionIOInputsAutoLogged inputs) {
-    return (inputs.tagCount >= Constants.LimelightConstants.MIN_TAG_COUNT && inputs.avgAmbiguity <= Constants.LimelightConstants.MAX_POSE_AMBIGUITY);
+    return (inputs.tagCount >= Constants.LimelightConstants.MIN_TAG_COUNT
+        && inputs.avgAmbiguity <= Constants.LimelightConstants.MAX_POSE_AMBIGUITY);
   }
 
-  public void setOverrideOdometry(boolean value){
+  public void setOverrideOdometry(boolean value) {
     overrideOdometry = value;
   }
 }
