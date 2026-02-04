@@ -26,8 +26,7 @@ public class Outtake extends SubsystemBase {
   }
 
   /**
-   * @return Returns a StartEndCommand that starts spinning the flywheel and stops spinning the
-   *     flywheel when the command ends.
+   * @return Returns a InstantCommand that starts spinning the flywheel and angles the hood.
    */
   public Command enterShootMode(Translation2d currentPosition) {
     return new InstantCommand(io::startFlywheel).andThen(new InstantCommand(() -> io.setAngleAtTarget(currentPosition)));
@@ -48,19 +47,21 @@ public class Outtake extends SubsystemBase {
 
   public Command sendBallsToShooter() {
     return new StartEndCommand(
-        () -> io.setIntakeVoltage(OuttakeConstants.INTAKE_TO_SHOOTER),
-        () -> io.setIntakeVoltage(0),
+        () -> io.setMiddleWheelVoltage(OuttakeConstants.MIDDLE_WHEEL_TO_SHOOTER_VOLTS),
+        () -> io.setMiddleWheelVoltage(0),
         this);
   }
 
   public Command groundOuttake() {
     return new StartEndCommand(
-        () -> io.setIntakeVoltage(OuttakeConstants.INTAKE_TO_GROUND),
-        () -> io.setIntakeVoltage(0),
+        () -> {
+            io.setMiddleWheelVoltage(OuttakeConstants.MIDDLE_WHEEL_TO_GROUND_VOLTS);
+            io.setStarWheelVoltage(OuttakeConstants.MIDDLE_WHEEL_TO_GROUND_VOLTS);
+        },
+        () -> {
+            io.setMiddleWheelVoltage(0);
+            io.setStarWheelVoltage(0);
+        },
         this);
-  }
-
-  public Command setHoodAngle(Angle angle) {
-    return new InstantCommand();
   }
 }

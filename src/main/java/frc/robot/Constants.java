@@ -84,11 +84,13 @@ public class Constants {
   public final class OuttakeConstants {
     public static final int RIGHT_SHOOTER_MOTOR = -1;
     public static final int LEFT_SHOOTER_MOTOR = -1;
-    public static final int INTAKE_MOTOR = -1;
+    public static final int MIDDLE_WHEEL_MOTOR = -1;
+    public static final int STAR_WHEEL_MOTOR = -1;
     public static final int ANGLE_CHANGER_MOTOR = -1;
 
-    public static final double INTAKE_TO_SHOOTER = 2;
-    public static final double INTAKE_TO_GROUND = 2;
+    public static final double MIDDLE_WHEEL_TO_SHOOTER_VOLTS = 2;
+    public static final double MIDDLE_WHEEL_TO_GROUND_VOLTS = -2;
+    public static final double STAR_WHEEL_TO_GROUND_VOLTS = 2;
 
     public static final double MINIMUM_SHOT_ANGLE_DEG = 0.0;
     public static final double MAXIMUM_SHOT_ANGLE_DEG = 0.0;
@@ -98,6 +100,11 @@ public class Constants {
 
     public static final double MIDFIELD_LIMIT_FEET = 0.0;
     public static final double OPPOSITE_TEAM_LIMIT_FEET = 0.0;
+
+    public static final double ANGLE_CHANGER_GEAR_RATIO = 1 / 16;
+
+    public static final double HOOD_ANGLE_KP = 0.0;
+    public static final double HOOD_ANGLE_KD = 0.0;
 
     public static final Translation2d HUB_POSITION = new Translation2d();
   }

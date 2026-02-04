@@ -29,8 +29,11 @@ public interface OuttakeIO extends Subsystem {
   /** Causes the flywheel to coast */
   public void stopFlywheel();
 
-  /** Causes the "intake" wheel to spin using specified voltage */
-  public void setIntakeVoltage(double voltage);
+  /** Causes the "middle" wheel to spin using specified voltage */
+  public void setMiddleWheelVoltage(double voltage);
+
+  /** Causes the star wheel to spin using specified voltage */
+  public void setStarWheelVoltage(double voltage);
 
   /** Sets the target shot angle, which the hood will constantly move towards, to be targeting the target */
   public void setAngleAtTarget(Translation2d currentPosition);
