@@ -91,6 +91,7 @@ public class Constants {
     public static final double MIDDLE_WHEEL_TO_SHOOTER_VOLTS = 2;
     public static final double MIDDLE_WHEEL_TO_GROUND_VOLTS = -2;
     public static final double STAR_WHEEL_TO_GROUND_VOLTS = 2;
+    public static final double FLYWHEEL_VOLTS = 12;
 
     public static final double MINIMUM_SHOT_ANGLE_DEG = 0.0;
     public static final double MAXIMUM_SHOT_ANGLE_DEG = 0.0;
@@ -106,6 +107,13 @@ public class Constants {
     public static final double HOOD_ANGLE_KP = 0.0;
     public static final double HOOD_ANGLE_KD = 0.0;
 
+    public static final double ANGLE_CHANGER_STARTING_ANGLE_ROTATIONS = 0.2070902417;
+
     public static final Translation2d HUB_POSITION = new Translation2d();
+
+    public static final double OUTTAKE_VELOCITY_MPS = 7.0;
+    public static final double GRAVITATIONAL_CONSTANT_MPS2 = 9.8;
+    public static final double HUB_HEIGHT_FEET = 6.0;
+    public static final double LAUNCH_HEIGHT_FEET = 2.5;
   }
 }
