@@ -16,13 +16,13 @@ public class Hopper extends SubsystemBase{
         Logger.processInputs("Hopper", inputs);
     }
     public void retract(){
-        io.goToPosition(io.positionToRotations(HopperConstants.HOPPER_RETRACTED));
+        io.goToPosition(HopperConstants.HOPPER_RETRACTED * HopperConstants.HOPPER_POSITION_TO_ANGLE_CONVERSION);
     }
     public void partial(){
-        io.goToPosition(io.positionToRotations(HopperConstants.HOPPER_PARTIAL));
+        io.goToPosition(HopperConstants.HOPPER_PARTIAL * HopperConstants.HOPPER_POSITION_TO_ANGLE_CONVERSION);
     }
     public void full(){
-        io.goToPosition(io.positionToRotations(HopperConstants.HOPPER_FULL));
+        io.goToPosition(HopperConstants.HOPPER_FULL * HopperConstants.HOPPER_POSITION_TO_ANGLE_CONVERSION);
     }
    
 

@@ -19,16 +19,12 @@ public class HopperIOSparkMax implements HopperIO {
     public void updateInputs(HopperIOInputs inputs) {
         inputs.hopperMotor_Volts =  hopperMotor.getBusVoltage();
         inputs.hopperMotor_Amps = hopperMotor.getOutputCurrent();
-        
-    }
-    @Override
-    public double positionToRotations(double position){
-       return ((position * HopperConstants.HOPPER_WINCH_GEAR_RATIO) / HopperConstants.HOPPER_WINCH_CIRCUMFRENCE);
-
-    }
-    @Override
-    public void goToPosition(double position_inches){
-        pidController.setSetpoint(positionToRotations(position_inches), SparkBase.ControlType.kMAXMotionPositionControl);
+        inputs.hopperExtension_Rotations = hopperEncoder.getPosition();
+        inputs.hopperExtension_Inches = inputs.hopperExtension_Rotations / HopperConstants.HOPPER_POSITION_TO_ANGLE_CONVERSION;
     }
    
+    @Override
+    public void goToPosition(double position_inches){
+        pidController.setSetpoint(position_inches * HopperConstants.HOPPER_POSITION_TO_ANGLE_CONVERSION, SparkBase.ControlType.kMAXMotionPositionControl);
+    }
 }

@@ -2,11 +2,13 @@ package frc.robot.subsystems.Hopper;
 
 import org.littletonrobotics.junction.AutoLog;
 
+import frc.robot.Constants.HopperConstants;
+
 public interface HopperIO {
     @AutoLog
     public static class HopperIOInputs{
-        public double hopperExtension_rotations = 0;
-        public double hopperExtension_inches = 0;
+        public double hopperExtension_Rotations = 0;
+        public double hopperExtension_Inches = (hopperExtension_Rotations  / HopperConstants.HOPPER_POSITION_TO_ANGLE_CONVERSION);
         public double hopperExtensionVelocity_inchesPerSecond = 0;
         public double hopperMotor_Volts = 0;
         public double hopperMotor_Amps = 0;
@@ -15,7 +17,7 @@ public interface HopperIO {
     }
     /** Update the set of loggable inputs */
     public void updateInputs(HopperIOInputs inputs);
-    public double positionToRotations(double position);
+  
     public void goToPosition(double position);
     
 

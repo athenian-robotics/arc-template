@@ -85,6 +85,7 @@ public class Constants {
 
     public final static double HOPPER_WINCH_GEAR_RATIO = 10;
     public final static double HOPPER_WINCH_CIRCUMFRENCE = 0.75 * Math.PI;
+    public final static double HOPPER_POSITION_TO_ANGLE_CONVERSION = HOPPER_WINCH_GEAR_RATIO / HOPPER_WINCH_CIRCUMFRENCE;
    
   
 //feedback constants
