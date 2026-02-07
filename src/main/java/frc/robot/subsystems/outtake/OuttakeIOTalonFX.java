@@ -21,7 +21,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.OuttakeConstants;
 
 public class OuttakeIOTalonFX extends SubsystemBase implements OuttakeIO {
-  private final TalonFX rightShooter, leftShooter, middleWheel, starWheel, angleChanger;
+  private final TalonFX leadShooter, followShooter, middleWheel, starWheel, angleChanger;
   private final OuttakeIOInputs logs;
   private double targetShotAngleDeg = OuttakeConstants.STARTING_SHOT_ANGLE_DEG;
 
@@ -33,13 +33,13 @@ public class OuttakeIOTalonFX extends SubsystemBase implements OuttakeIO {
   public OuttakeIOTalonFX() {
     super();
     logs = new OuttakeIOInputs();
-    leftShooter = new TalonFX(OuttakeConstants.LEFT_SHOOTER_MOTOR);
-    rightShooter = new TalonFX(OuttakeConstants.RIGHT_SHOOTER_MOTOR);
+    followShooter = new TalonFX(OuttakeConstants.LEFT_SHOOTER_MOTOR);
+    leadShooter = new TalonFX(OuttakeConstants.RIGHT_SHOOTER_MOTOR);
 
-    leftShooter.setControl(
+    followShooter.setControl(
         new Follower(OuttakeConstants.RIGHT_SHOOTER_MOTOR, MotorAlignmentValue.Opposed));
     
-    rightShooter.getConfigurator().apply(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Coast)); // To make re-spinning up faster
+    leadShooter.getConfigurator().apply(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Coast)); // To make re-spinning up faster
     middleWheel = new TalonFX(OuttakeConstants.MIDDLE_WHEEL_MOTOR);
     starWheel = new TalonFX(OuttakeConstants.STAR_WHEEL_MOTOR);
     angleChanger = new TalonFX(OuttakeConstants.ANGLE_CHANGER_MOTOR);
@@ -126,12 +126,12 @@ public class OuttakeIOTalonFX extends SubsystemBase implements OuttakeIO {
   }
 
   public void startFlywheel() {
-    rightShooter.setControl(new VoltageOut(OuttakeConstants.FLYWHEEL_VOLTS));
-    Logger.recordOutput("Outtake/FlywheelVoltage", OuttakeConstants.FLYWHEEL_VOLTS);
+    leadShooter.setControl(new VoltageOut(OuttakeConstants.FLYWHEEL_VOLTS));
+    Logger.recordOutput("Outtake/FlywheelVoltage", leadShooter.getMotorVoltage().getValue());
   }
 
   public void stopFlywheel() {
-    rightShooter.set(0.0);
+    leadShooter.set(0.0);
     Logger.recordOutput("Outtake/FlywheelVoltage", 0.0);
   }
 
@@ -156,6 +156,7 @@ public class OuttakeIOTalonFX extends SubsystemBase implements OuttakeIO {
     }
     
     // TODO: check in with drive team if we should try shot next update/tick if angle is empty
+    // TODO: figure out how to account for blueside/redside when integrating this with pose estimation
     calculateAngle(currentPosition, OuttakeConstants.HUB_POSITION)
       .ifPresent(
         (angle) -> targetShotAngleDeg = angle

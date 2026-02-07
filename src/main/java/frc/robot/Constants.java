@@ -112,7 +112,7 @@ public class Constants {
 
     public static final Translation2d HUB_POSITION = new Translation2d();
 
-    public static final double OUTTAKE_VELOCITY_MPS = 7.0;
+    public static final double OUTTAKE_VELOCITY_MPS = 14.5; //based on recalc in slack
     public static final double GRAVITATIONAL_CONSTANT_MPS2 = 9.8;
     public static final double HUB_HEIGHT_FEET = 6.0;
     public static final double LAUNCH_HEIGHT_FEET = 2.5;

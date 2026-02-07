@@ -9,7 +9,7 @@ public interface OuttakeIO extends Subsystem {
   public static class OuttakeIOInputs {
     /** The actual angle of the hood, in degrees, representing launch angle compared to horizontal with ccw+ */
     public double currentShotAngleDegrees = 0.0;
-    /** The target angle of the hood, following the above rules */
+    /** The target angle of the hood, in degrees, representing launch angle compared to horizontal with ccw+ */
     public double targetShotAngleDegrees = 0.0;
     /** The current angular velocity of the hood in degrees per second */
     public double currentAngularVelocityDegPerSecond = 0.0;

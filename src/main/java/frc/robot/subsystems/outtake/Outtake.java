@@ -27,13 +27,10 @@ public class Outtake extends SubsystemBase {
 
   /**
    * @return Returns a InstantCommand that starts spinning the flywheel and angles the hood.
+   * @param currentPosition The current position of the robot center on the field
    */
   public Command enterShootMode(Translation2d currentPosition) {
     return new InstantCommand(io::startFlywheel).andThen(new InstantCommand(() -> io.setAngleAtTarget(currentPosition)));
-  }
-
-  public Command lowerHood() {
-    return new InstantCommand(() -> io.setAngle(OuttakeConstants.MAXIMUM_SHOT_ANGLE_DEG));
   }
 
   /**
@@ -43,6 +40,10 @@ public class Outtake extends SubsystemBase {
    */
   public Command enterShootMode(double shotAngleDeg) {
     return new InstantCommand(io::startFlywheel).andThen(new InstantCommand(() -> io.setAngle(shotAngleDeg)));
+  }
+
+  public Command lowerHood() {
+    return new InstantCommand(() -> io.setAngle(OuttakeConstants.MAXIMUM_SHOT_ANGLE_DEG));
   }
 
   public Command stopFlywheel() {
