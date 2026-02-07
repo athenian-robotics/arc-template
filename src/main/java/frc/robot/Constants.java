@@ -82,6 +82,9 @@ public class Constants {
     public final static double HOPPER_RETRACTED = 0;
     public final static double HOPPER_PARTIAL = 4;
     public final static double HOPPER_FULL = 11.425;
+
+    public final static double HOPPER_WINCH_GEAR_RATIO = 10;
+    public final static double HOPPER_WINCH_CIRCUMFRENCE = 0.75 * Math.PI;
    
   
 //feedback constants

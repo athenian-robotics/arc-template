@@ -15,6 +15,7 @@ public interface HopperIO {
     }
     /** Update the set of loggable inputs */
     public void updateInputs(HopperIOInputs inputs);
+    public void positionToRotations(double position);
     public void goToPosition(double position);
     
 
