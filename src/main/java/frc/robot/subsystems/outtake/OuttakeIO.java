@@ -13,6 +13,8 @@ public interface OuttakeIO extends Subsystem {
     public double targetShotAngleDegrees = 0.0;
     /** The current angular velocity of the hood in degrees per second */
     public double currentAngularVelocityDegPerSecond = 0.0;
+    /** Distance to the target in feet */
+    public double targetDistanceFeet = 0.0;
   }
 
   /** Updates logs; util for AdvantageScope

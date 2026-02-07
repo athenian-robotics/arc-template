@@ -91,11 +91,12 @@ public class Constants {
     public static final double MIDDLE_WHEEL_TO_SHOOTER_VOLTS = 2;
     public static final double MIDDLE_WHEEL_TO_GROUND_VOLTS = -2;
     public static final double STAR_WHEEL_TO_GROUND_VOLTS = 2;
+    public static final double STAR_WHEEL_TO_SHOOTER_VOLTS = 2;
     public static final double FLYWHEEL_VOLTS = 12;
 
-    public static final double MINIMUM_SHOT_ANGLE_DEG = 0.0;
-    public static final double MAXIMUM_SHOT_ANGLE_DEG = 0.0;
-    public static final double STARTING_SHOT_ANGLE_DEG = 0.0;
+    public static final double MINIMUM_SHOT_ANGLE_DEG = 48.782882;
+    public static final double MAXIMUM_SHOT_ANGLE_DEG = 74.552487;
+    public static final double STARTING_SHOT_ANGLE_DEG = 74.552487;
     public static final double MIDFIELD_SHOT_ANGLE_DEG = 0.0;
     public static final double OPPOSITE_TEAM_SHOT_ANGLE_DEG = 0.0;
 

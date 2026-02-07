@@ -16,6 +16,7 @@ import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.OuttakeConstants;
 
@@ -26,6 +27,8 @@ public class OuttakeIOTalonFX extends SubsystemBase implements OuttakeIO {
 
   private double currentAngleDeg = 0.0;
   private double currentAngularVelocityDegPerSecond = 0.0;
+  private double targetHeightOffsetMeters = 0.0;
+  private double targetDistanceMeters = 0.0;
 
   public OuttakeIOTalonFX() {
     super();
@@ -41,18 +44,22 @@ public class OuttakeIOTalonFX extends SubsystemBase implements OuttakeIO {
     starWheel = new TalonFX(OuttakeConstants.STAR_WHEEL_MOTOR);
     angleChanger = new TalonFX(OuttakeConstants.ANGLE_CHANGER_MOTOR);
 
-    // This represents the starting position of the hood
+    // Represents the starting position of the hood
     angleChanger.setPosition(OuttakeConstants.ANGLE_CHANGER_STARTING_ANGLE_ROTATIONS / OuttakeConstants.ANGLE_CHANGER_GEAR_RATIO);
     currentAngleDeg = OuttakeConstants.ANGLE_CHANGER_STARTING_ANGLE_ROTATIONS * 360;
   }
 
   public void periodic() {
+    // Update the current angle by getting the motor position and multiplying by gear ratio
     currentAngleDeg = angleChanger.getPosition().getValue().in(Degrees) * OuttakeConstants.ANGLE_CHANGER_GEAR_RATIO;
+    // Update the current angular velocity by getting the motor velocity and multiplying by gear ratio
     currentAngularVelocityDegPerSecond = angleChanger.getVelocity().getValue().in(DegreesPerSecond) * OuttakeConstants.ANGLE_CHANGER_GEAR_RATIO;
 
+    // Calculate the angle error from target position to actual position
     double angleError = targetShotAngleDeg - currentAngleDeg;
     double angularVelocityError = 0 - currentAngularVelocityDegPerSecond;
 
+    // PID logic
     double appliedVoltage = (angleError * OuttakeConstants.HOOD_ANGLE_KP) + (angularVelocityError * OuttakeConstants.HOOD_ANGLE_KD);
     Logger.recordOutput("Outtake/AngleVoltage", appliedVoltage);
 
@@ -60,28 +67,34 @@ public class OuttakeIOTalonFX extends SubsystemBase implements OuttakeIO {
   }
 
   /**
-   * Calculates how to aim for the hub.
+   * Calculates how to aim the shooter to hit a target.
    *
-   * @return the angle required to shoot into the hub from its location
+   * @param currentPosition the position to aim from
+   * @param targetPosition the position to aim at
+   * @return the angle required to shoot into the hub from its location as an optional double
    */
-  public OptionalDouble calculateAngle(Translation2d targetPosition) {
-    // PASTE INTO DESMOS V V V
-    // a_{ngle}=\arctan\left(\frac{\left(v^{2}+\sqrt{v^{4}-g\left(gd^{2}+2hv^{2}\right)}\right)}{gd}\right)
-    // This is unreadable right now so use this ^ ^ ^
-
+  public OptionalDouble calculateAngle(Translation2d currentPosition, Translation2d targetPosition) {
     // The height offset from the robot hood to the target in meters because metric is better
-    double height = (OuttakeConstants.HUB_HEIGHT_FEET - OuttakeConstants.LAUNCH_HEIGHT_FEET) * 0.3048;
+    targetHeightOffsetMeters = Units.feetToMeters(OuttakeConstants.HUB_HEIGHT_FEET - OuttakeConstants.LAUNCH_HEIGHT_FEET);
     // The outtake velocity it meters per second
     double velocity = OuttakeConstants.OUTTAKE_VELOCITY_MPS;
     // The gravitational constant of 9.8 m/s^2
     double gravity = OuttakeConstants.GRAVITATIONAL_CONSTANT_MPS2;
     // The horizontal part of the distance between the robot and the target
-    double distance = 1;
-
+    targetDistanceMeters = currentPosition.getDistance(targetPosition);
+    
+    // These are renamed to make the math look smaller
+    double height = targetHeightOffsetMeters;
+    double distance = targetDistanceMeters;
+    
     // If distance is zero there will (might?) be a division by zero
     if (distance == 0) return OptionalDouble.empty();
     
     // ~Math~
+
+    // This code is unreadable right now so use this   V V V
+    // a_{ngle}=\arctan\left(\frac{\left(v^{2}+\sqrt{v^{4}-g\left(gd^{2}+2hv^{2}\right)}\right)}{gd}\right)
+    // PASTE INTO DESMOS TO VIEW                       ^ ^ ^
 
     // The discriminant is useful for telling how many solutions there are
     double discriminant = 
@@ -105,9 +118,11 @@ public class OuttakeIOTalonFX extends SubsystemBase implements OuttakeIO {
 
   @Override
   public void updateInputs(OuttakeIOInputs inputs) {
+    // Inputs for IO logging
     inputs.currentShotAngleDegrees = currentAngleDeg;
     inputs.currentAngularVelocityDegPerSecond = currentAngularVelocityDegPerSecond;
     inputs.targetShotAngleDegrees = targetShotAngleDeg;
+    inputs.targetDistanceFeet = Units.metersToFeet(targetDistanceMeters);
   }
 
   public void startFlywheel() {
@@ -139,8 +154,12 @@ public class OuttakeIOTalonFX extends SubsystemBase implements OuttakeIO {
       targetShotAngleDeg = OuttakeConstants.MIDFIELD_SHOT_ANGLE_DEG;
       return;
     }
-    double shotDistanceFeet = currentPosition.getDistance(OuttakeConstants.HUB_POSITION);
-    throw new UnsupportedOperationException("We haven't yet figured out the shot angle formula");
+    
+    // TODO: check in with drive team if we should try shot next update/tick if angle is empty
+    calculateAngle(currentPosition, OuttakeConstants.HUB_POSITION)
+      .ifPresent(
+        (angle) -> targetShotAngleDeg = angle
+    );
   }
 
   public void setAngle(double angleDegrees) {

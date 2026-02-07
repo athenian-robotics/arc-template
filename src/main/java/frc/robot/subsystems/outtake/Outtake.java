@@ -32,6 +32,10 @@ public class Outtake extends SubsystemBase {
     return new InstantCommand(io::startFlywheel).andThen(new InstantCommand(() -> io.setAngleAtTarget(currentPosition)));
   }
 
+  public Command lowerHood() {
+    return new InstantCommand(() -> io.setAngle(OuttakeConstants.MAXIMUM_SHOT_ANGLE_DEG));
+  }
+
   /**
    * Starts the flywheel and angles the hood according to the parameter
    * @param shotAngleDeg The angle at which the ball will exit the shooter ccw+ from horizontal
@@ -47,8 +51,14 @@ public class Outtake extends SubsystemBase {
 
   public Command sendBallsToShooter() {
     return new StartEndCommand(
-        () -> io.setMiddleWheelVoltage(OuttakeConstants.MIDDLE_WHEEL_TO_SHOOTER_VOLTS),
-        () -> io.setMiddleWheelVoltage(0),
+        () -> {
+          io.setMiddleWheelVoltage(OuttakeConstants.MIDDLE_WHEEL_TO_SHOOTER_VOLTS);
+          io.setStarWheelVoltage(OuttakeConstants.STAR_WHEEL_TO_SHOOTER_VOLTS);
+        },
+        () -> {
+          io.setMiddleWheelVoltage(0);
+          io.setStarWheelVoltage(0);
+        },
         this);
   }
 
@@ -56,7 +66,7 @@ public class Outtake extends SubsystemBase {
     return new StartEndCommand(
         () -> {
             io.setMiddleWheelVoltage(OuttakeConstants.MIDDLE_WHEEL_TO_GROUND_VOLTS);
-            io.setStarWheelVoltage(OuttakeConstants.MIDDLE_WHEEL_TO_GROUND_VOLTS);
+            io.setStarWheelVoltage(OuttakeConstants.STAR_WHEEL_TO_GROUND_VOLTS);
         },
         () -> {
             io.setMiddleWheelVoltage(0);
