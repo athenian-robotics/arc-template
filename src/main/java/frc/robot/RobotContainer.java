@@ -28,6 +28,8 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.pathgeneration.PathGeneration;
+import frc.robot.subsystems.pathgeneration.PathGenerationIO;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
@@ -43,6 +45,7 @@ public class RobotContainer {
   // -- Subsystems --
   private final Drive drive;
   private final Vision vision;
+  private final PathGeneration pathGeneration;
 
   // -- Controllers --
   private final CommandJoystick driveJoystick =
@@ -69,6 +72,7 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
+        pathGeneration = new PathGeneration(new PathGenerationIO() {});
         break;
 
       case SIM:
@@ -82,6 +86,7 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
+        pathGeneration = new PathGeneration(new PathGenerationIO() {});
         break;
 
       default:
@@ -95,6 +100,7 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
+        pathGeneration = new PathGeneration(new PathGenerationIO() {});
         break;
     }
 
@@ -169,6 +175,9 @@ public class RobotContainer {
     //                         new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
     //                 drive)
     //             .ignoringDisable(true));
+
+    // Example binding for pathfinding to Speaker Center
+    // operatorJoystick.button(1).onTrue(pathGeneration.pathfindTo(PathGeneration.Location.SPEAKER_CENTER));
   }
 
   /**
