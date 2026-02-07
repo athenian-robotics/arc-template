@@ -23,6 +23,7 @@ import frc.robot.Constants.OuttakeConstants;
 public class OuttakeIOTalonFX extends SubsystemBase implements OuttakeIO {
   private final TalonFX leadShooter, followShooter, middleWheel, starWheel, angleChanger;
   private final OuttakeIOInputs logs;
+
   private double targetShotAngleDeg = OuttakeConstants.STARTING_SHOT_ANGLE_DEG;
 
   private double currentAngleDeg = 0.0;
@@ -164,6 +165,12 @@ public class OuttakeIOTalonFX extends SubsystemBase implements OuttakeIO {
   }
 
   public void setAngle(double angleDegrees) {
+    if (OuttakeConstants.MINIMUM_SHOT_ANGLE_DEG > angleDegrees 
+     || OuttakeConstants.MAXIMUM_SHOT_ANGLE_DEG < angleDegrees) {
+      System.out.println("setAngle was passed an invalid angle");
+      return;
+    }
+
     targetShotAngleDeg = angleDegrees;
   }
 }
