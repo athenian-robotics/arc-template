@@ -120,6 +120,16 @@ public class RobotContainer {
         "Drive SysId (Dynamic Forward)", drive.sysIdDynamicDrive(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamicDrive(SysIdRoutine.Direction.kReverse));
+    autoChooser.addOption(
+        "Turn SysId (Quasistatic Forward)",
+        drive.sysIdQuasistaticRotate(SysIdRoutine.Direction.kForward));
+    autoChooser.addOption(
+        "Turn SysId (Quasistatic Reverse)",
+        drive.sysIdQuasistaticRotate(SysIdRoutine.Direction.kReverse));
+    autoChooser.addOption(
+        "Turn SysId (Dynamic Forward)", drive.sysIdDynamicRotate(SysIdRoutine.Direction.kForward));
+    autoChooser.addOption(
+        "Turn SysId (Dynamic Reverse)", drive.sysIdDynamicRotate(SysIdRoutine.Direction.kReverse));
 
     // Configure the button bindings
     configureJoystickBindings();

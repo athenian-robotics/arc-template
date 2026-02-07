@@ -160,17 +160,18 @@ public class Drive extends SubsystemBase {
                 null,
                 null,
                 null,
-                (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
+                (state) -> Logger.recordOutput("Drive/DriveSysIdState", state.toString())),
             new SysIdRoutine.Mechanism(
                 (voltage) -> runDriveCharacterization(voltage.in(Volts)), null, this));
-    
+
     sysIdRotate =
-        new SysIdRoutine(new SysIdRoutine.Config(
+        new SysIdRoutine(
+            new SysIdRoutine.Config(
                 null,
                 null,
                 null,
-                (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())), 
-              new SysIdRoutine.Mechanism(
+                (state) -> Logger.recordOutput("Drive/RotateSysIdState", state.toString())),
+            new SysIdRoutine.Mechanism(
                 (voltage) -> runRotateCharacterization(voltage.in(Volts)), null, this));
   }
 
@@ -289,9 +290,10 @@ public class Drive extends SubsystemBase {
 
   /** Rotates the robot in place with the specified rotational output. */
   public void runRotateCharacterization(double output) {
-    for (int i = 0; i < 4; i++) {
-      modules[i].runCharacterization(output, new Rotation2d(Degrees.of(45 + 90 * i)));
-    }
+    modules[0].runCharacterization(output, new Rotation2d(Degrees.of(135))); // fl
+    modules[1].runCharacterization(output, new Rotation2d(Degrees.of(45))); // fr
+    modules[3].runCharacterization(output, new Rotation2d(Degrees.of(315))); // br
+    modules[2].runCharacterization(output, new Rotation2d(Degrees.of(225))); // bl
   }
 
   /** Stops the drive. */
@@ -321,7 +323,9 @@ public class Drive extends SubsystemBase {
 
   /** Returns a command to run a dynamic drive test in the specified direction. */
   public Command sysIdDynamicDrive(SysIdRoutine.Direction direction) {
-    return run(() -> runDriveCharacterization(0.0)).withTimeout(1.0).andThen(sysIdDrive.dynamic(direction));
+    return run(() -> runDriveCharacterization(0.0))
+        .withTimeout(1.0)
+        .andThen(sysIdDrive.dynamic(direction));
   }
 
   /** Returns a command to run a quasistatic rotate test in the specified direction. */
@@ -333,7 +337,9 @@ public class Drive extends SubsystemBase {
 
   /** Returns a command to run a quasistatic rotate test in the specified direction. */
   public Command sysIdDynamicRotate(SysIdRoutine.Direction direction) {
-    return run(() -> runRotateCharacterization(0.0)).withTimeout(1.0).andThen(sysIdRotate.dynamic(direction));
+    return run(() -> runRotateCharacterization(0.0))
+        .withTimeout(1.0)
+        .andThen(sysIdRotate.dynamic(direction));
   }
 
   /** Returns the module states (turn angles and drive velocities) for all of the modules. */
