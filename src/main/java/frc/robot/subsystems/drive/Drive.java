@@ -28,6 +28,7 @@ import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -44,11 +45,13 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.RuntimeConstants;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.vision.Vision;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -86,6 +89,7 @@ public class Drive extends SubsystemBase {
           getModuleTranslations());
 
   static final Lock odometryLock = new ReentrantLock();
+  private final Vision vision;
   private final GyroIO gyroIO;
   private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
   private final Module[] modules = new Module[4]; // FL, FR, BL, BR
@@ -104,13 +108,16 @@ public class Drive extends SubsystemBase {
       };
   private SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
+  private final Field2d field = new Field2d();
 
   public Drive(
+      Vision vision,
       GyroIO gyroIO,
       ModuleIO flModuleIO,
       ModuleIO frModuleIO,
       ModuleIO blModuleIO,
       ModuleIO brModuleIO) {
+    this.vision = vision;
     this.gyroIO = gyroIO;
     modules[0] = new Module(flModuleIO, 0, TunerConstants.FrontLeft);
     modules[1] = new Module(frModuleIO, 1, TunerConstants.FrontRight);
@@ -211,6 +218,28 @@ public class Drive extends SubsystemBase {
       // Apply update
       poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
     }
+
+    // Update vision
+    vision.setRobotOrientation(getRotation(), gyroInputs.yawVelocityRadPerSec);
+    var visionObservation =
+        vision.getVisionObservation(DriverStation.isDisabled() ? null : getPose());
+    if (visionObservation.isPresent()) {
+      var obs = visionObservation.get();
+      addVisionMeasurement(
+          obs.pose(),
+          obs.timestampSeconds(),
+          VecBuilder.fill(obs.xyStdDevMeters(), obs.xyStdDevMeters(), obs.thetaStdDevRad()));
+      Logger.recordOutput("Odometry/VisionObservation/TagDistance", obs.avgTagDistanceMeters());
+      field.getObject("Vision").setPose(obs.pose());
+    } else {
+      field.getObject("Vision").setPose(new Pose2d(-100, -100, new Rotation2d()));
+    }
+
+    // Update Field2d
+    field.setRobotPose(getPose());
+    Logger.recordOutput("Odometry/Robot", Pose2d.struct, getPose());
+    Logger.recordOutput("SwerveStates/Measured", SwerveModuleState.struct, getModuleStates());
+    Logger.recordOutput("SwerveChassisSpeeds/Measured", getChassisSpeeds());
 
     // Update gyro alert
     gyroDisconnectedAlert.set(
