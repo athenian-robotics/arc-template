@@ -13,18 +13,19 @@ import frc.robot.Constants.HopperConstants;
 
 
 public class HopperIOSim implements HopperIO {
-    SparkMax motor = new SparkMax(0, MotorType.kBrushless);
+    SparkMax motor = new SparkMax(HopperConstants.SPARK_ID, MotorType.kBrushless);
     DCMotor m = DCMotor.getNeo550(1);
+    motor.getClosedLoo
     
     private final SparkMaxSim hopperMotor = new SparkMaxSim(motor, m);
     private final SparkClosedLoopController pidController = motor.getClosedLoopController();
-    private final RelativeEncoder hopperEncoder = hopperMotor.getEncoder();
+
     
     
     /** Update the set of loggable inputs */
     public void updateInputs(HopperIOInputs inputs) {
         inputs.hopperMotor_Volts =  hopperMotor.getBusVoltage();
-        inputs.hopperMotor_Amps = hopperMotor.getOutputCurrent();
+        hopperMotor.
         
     }
     public double positionToRotations(double position){
