@@ -46,6 +46,7 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -162,7 +163,9 @@ public class Drive extends SubsystemBase {
                 null,
                 (state) -> Logger.recordOutput("Drive/DriveSysIdState", state.toString())),
             new SysIdRoutine.Mechanism(
-                (voltage) -> runDriveCharacterization(voltage.in(Volts)), null, this));
+                (voltage) -> runDriveCharacterization(voltage.in(Volts)),
+                (log) -> driveSysIdLog(log),
+                this));
 
     sysIdRotate =
         new SysIdRoutine(
@@ -172,7 +175,9 @@ public class Drive extends SubsystemBase {
                 null,
                 (state) -> Logger.recordOutput("Drive/RotateSysIdState", state.toString())),
             new SysIdRoutine.Mechanism(
-                (voltage) -> runRotateCharacterization(voltage.in(Volts)), null, this));
+                (voltage) -> runRotateCharacterization(voltage.in(Volts)),
+                (log) -> rotateSysIdLog(log),
+                this));
   }
 
   @Override
@@ -294,6 +299,36 @@ public class Drive extends SubsystemBase {
     modules[1].runCharacterization(output, new Rotation2d(Degrees.of(45))); // fr
     modules[3].runCharacterization(output, new Rotation2d(Degrees.of(315))); // br
     modules[2].runCharacterization(output, new Rotation2d(Degrees.of(225))); // bl
+  }
+
+  public void driveSysIdLog(SysIdRoutineLog log) {
+    log.motor("fl")
+        .linearPosition(Meters.of(modules[0].getPositionMeters()))
+        .linearVelocity(MetersPerSecond.of(modules[0].getVelocityMetersPerSec()));
+    log.motor("fr")
+        .linearPosition(Meters.of(modules[1].getPositionMeters()))
+        .linearVelocity(MetersPerSecond.of(modules[1].getVelocityMetersPerSec()));
+    log.motor("bl")
+        .linearPosition(Meters.of(modules[2].getPositionMeters()))
+        .linearVelocity(MetersPerSecond.of(modules[2].getVelocityMetersPerSec()));
+    log.motor("br")
+        .linearPosition(Meters.of(modules[3].getPositionMeters()))
+        .linearVelocity(MetersPerSecond.of(modules[3].getVelocityMetersPerSec()));
+  }
+
+  public void rotateSysIdLog(SysIdRoutineLog log) {
+    log.motor("fl")
+        .linearPosition(Meters.of(modules[0].getPositionMeters()))
+        .linearVelocity(MetersPerSecond.of(modules[0].getVelocityMetersPerSec()));
+    log.motor("fr")
+        .linearPosition(Meters.of(modules[1].getPositionMeters()))
+        .linearVelocity(MetersPerSecond.of(modules[1].getVelocityMetersPerSec()));
+    log.motor("bl")
+        .linearPosition(Meters.of(modules[2].getPositionMeters()))
+        .linearVelocity(MetersPerSecond.of(modules[2].getVelocityMetersPerSec()));
+    log.motor("br")
+        .linearPosition(Meters.of(modules[3].getPositionMeters()))
+        .linearVelocity(MetersPerSecond.of(modules[3].getVelocityMetersPerSec()));
   }
 
   /** Stops the drive. */
