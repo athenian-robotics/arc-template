@@ -15,7 +15,6 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -134,9 +133,6 @@ public class RobotContainer {
         "Turn SysId (Dynamic Forward)", drive.sysIdDynamicRotate(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Turn SysId (Dynamic Reverse)", drive.sysIdDynamicRotate(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-        "Test PathPlanner auto", ppAuto
-    );
 
     // Configure the button bindings
     configureJoystickBindings();
