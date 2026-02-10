@@ -14,7 +14,7 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.commands.PathfindingCommand;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -37,7 +37,6 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.util.PathGeneration;
-
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -108,8 +107,6 @@ public class RobotContainer {
 
     pathGeneration = new PathGeneration();
 
-    Command ppAuto = new PathPlannerAuto("New Auto");
-
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
@@ -141,6 +138,8 @@ public class RobotContainer {
 
     // Configure the button bindings
     configureJoystickBindings();
+
+    PathfindingCommand.warmupCommand().schedule();
   }
 
   /**
@@ -192,10 +191,12 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    //Should return the bot to its initial position
+    // Should return the bot to its initial position
     driveJoystick
         .button(ControllerConstants.TRIGGER)
-        .onTrue(pathGeneration.pathfindTo(new Pose2d()));
+        .whileTrue(
+            Commands.runOnce(() -> System.out.println("Running path gen"))
+                .andThen(pathGeneration.pathfindTo(new Pose2d(14.55, 1.0, new Rotation2d()))));
   }
 
   /**

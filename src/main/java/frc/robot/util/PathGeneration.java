@@ -7,7 +7,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.PathGenerationConstants;
 import frc.robot.Constants.PathGenerationConstants.Location;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,20 +60,21 @@ public class PathGeneration {
   }
 
   /**
-   * Generates a command to pathfind to a location while running another command in parallel.
-   * The parallel command will run until the pathfinding is complete.
+   * Generates a command to pathfind to a location while running another command in parallel. The
+   * parallel command will run until the pathfinding is complete.
    *
    * @param location The target location.
    * @param parallelCommand The command to run while moving.
    * @return A ParallelDeadlineGroup containing the pathfinding command and the parallel command.
    */
   public Command pathfindToWithHook(Location location, Command parallelCommand) {
-    return pathfindToWithHook(location.getPose(), PathGenerationConstants.DEFAULT_CONSTRAINTS, parallelCommand);
+    return pathfindToWithHook(
+        location.getPose(), PathGenerationConstants.DEFAULT_CONSTRAINTS, parallelCommand);
   }
 
   /**
-   * Generates a command to pathfind to a pose while running another command in parallel.
-   * The parallel command will run until the pathfinding is complete.
+   * Generates a command to pathfind to a pose while running another command in parallel. The
+   * parallel command will run until the pathfinding is complete.
    *
    * @param targetPose The target pose.
    * @param constraints Path constraints.

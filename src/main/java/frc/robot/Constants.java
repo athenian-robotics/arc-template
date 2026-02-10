@@ -4,7 +4,6 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
 import com.pathplanner.lib.path.PathConstraints;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -142,7 +141,6 @@ public class Constants {
 
   public final class PathGenerationConstants {
 
-
     // Predefined locations of interest
     public enum Location {
       SPEAKER_CENTER(new Pose2d(0.0, 5.5, Rotation2d.fromDegrees(0))), // Example coordinates
@@ -160,14 +158,18 @@ public class Constants {
         return pose;
       }
     }
-   
-  // Default constraints for pathfinding
+
+    // Default constraints for pathfinding
     // Adjust these based on your robot's capabilities
     public static final PathConstraints DEFAULT_CONSTRAINTS =
         new PathConstraints(
             TunerConstants.kSpeedAt12Volts.in(MetersPerSecond), // Max velocity (m/s)
             7.9, // Max acceleration (m/s^2) (from PathPlanner)
-            TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) / Math.sqrt(Math.pow(0.273, 2) * 2), // Max angular velocity (rad/s) calculated by dividing velocity by wheel radius
+            TunerConstants.kSpeedAt12Volts.in(MetersPerSecond)
+                / Math.sqrt(
+                    Math.pow(0.273, 2)
+                        * 2), // Max angular velocity (rad/s) calculated by dividing velocity by
+            // wheel radius
             Units.degreesToRadians(790)); // Max angular acceleration (rad/s^2) (from PathPlanner)
   }
 }
