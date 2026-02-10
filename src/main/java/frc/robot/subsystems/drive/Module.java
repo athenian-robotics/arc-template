@@ -88,10 +88,10 @@ public class Module {
     io.setTurnPosition(state.angle);
   }
 
-  /** Runs the module with the specified output while controlling to zero degrees. */
-  public void runCharacterization(double output) {
+  /** Runs the module with the specified output at the specified angle. */
+  public void runCharacterization(double output, Rotation2d angle) {
     io.setDriveOpenLoop(output);
-    io.setTurnPosition(new Rotation2d());
+    io.setTurnPosition(angle);
   }
 
   /** Disables all outputs to motors. */
