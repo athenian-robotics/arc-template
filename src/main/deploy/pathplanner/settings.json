@@ -18,7 +18,7 @@
   "driveMotorType": "falcon500",
   "driveCurrentLimit": 60.0,
   "wheelCOF": 1.542,
-  "flModuleX": 0.27305,
+  "flModuleX": 0.273,
   "flModuleY": 0.27305,
   "frModuleX": 0.273,
   "frModuleY": -0.273,

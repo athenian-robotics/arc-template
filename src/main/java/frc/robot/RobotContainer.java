@@ -33,11 +33,11 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
-import frc.robot.subsystems.pathgeneration.PathGeneration;
-import frc.robot.subsystems.pathgeneration.PathGenerationIO;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
+import frc.robot.util.PathGeneration;
+
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -77,7 +77,6 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
-        pathGeneration = new PathGeneration(new PathGenerationIO() {});
         break;
 
       case SIM:
@@ -91,7 +90,6 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
-        pathGeneration = new PathGeneration(new PathGenerationIO() {});
         break;
 
       default:
@@ -105,9 +103,10 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
-        pathGeneration = new PathGeneration(new PathGenerationIO() {});
         break;
     }
+
+    pathGeneration = new PathGeneration();
 
     Command ppAuto = new PathPlannerAuto("New Auto");
 
@@ -192,6 +191,11 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                     drive)
                 .ignoringDisable(true));
+
+    //Should return the bot to its initial position
+    driveJoystick
+        .button(ControllerConstants.TRIGGER)
+        .onTrue(pathGeneration.pathfindTo(new Pose2d()));
   }
 
   /**
