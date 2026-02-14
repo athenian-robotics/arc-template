@@ -6,6 +6,8 @@ import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.PathGenerationConstants;
@@ -66,6 +68,7 @@ public class PathGeneration {
    * Generates a command to pathfind to a specific known location.
    *
    * @param location The target location of interest.
+   * @param endVelocity_MPS The goal end velocity in meters per second.
    * @return The pathfinding command.
    */
   public Command pathfindToSimple(Location location, double endVelocity_MPS) {
@@ -77,6 +80,7 @@ public class PathGeneration {
    *
    * @param location The target location of interest.
    * @param constraints The path constraints to use.
+   * @param endVelocity_MPS The goal end velocity in meters per second.
    * @return The pathfinding command.
    */
   public Command pathfindToSimple(Location location, PathConstraints constraints, double endVelocity_MPS) {
@@ -98,14 +102,18 @@ public class PathGeneration {
    *
    * @param targetPose The target pose on the field.
    * @param constraints The path constraints to use.
+   * @param endVelocity_MPS The goal end velocity in meters per second.
    * @return The pathfinding command.
    */
   public Command pathfindToSimple(Pose2d targetPose, PathConstraints constraints, double endVelocity_MPS) {
-    // 0.0 is the goal end velocity (stop at the end)
+    Translation2d currentTranslation = AutoBuilder.getCurrentPose().getTranslation();
+    Translation2d targetTranslation = targetPose.getTranslation();
+    Rotation2d angleToTarget = targetTranslation.minus(currentTranslation).getAngle();
+
     return AutoBuilder.followPath(new PathPlannerPath(
       PathPlannerPath.waypointsFromPoses(
-        new Pose2d(AutoBuilder.getCurrentPose().getTranslation(), targetPose.getTranslation().minus(AutoBuilder.getCurrentPose().getTranslation()).getAngle()),
-        new Pose2d(targetPose.getTranslation(), targetPose.getTranslation().minus(AutoBuilder.getCurrentPose().getTranslation()).getAngle())
+        new Pose2d(currentTranslation, angleToTarget),
+        new Pose2d(targetTranslation, angleToTarget)
       ), constraints, null, new GoalEndState(endVelocity_MPS, targetPose.getRotation()))
     );
   }
@@ -121,6 +129,32 @@ public class PathGeneration {
   public Command pathfindToWithHook(Location location, Command parallelCommand) {
     return pathfindToWithHook(
         location.getPose(), PathGenerationConstants.DEFAULT_CONSTRAINTS, parallelCommand);
+  }
+
+  /**
+   * Generates a command to pathfind to a location while running another command in parallel. The
+   * parallel command will run until the pathfinding is complete.
+   *
+   * @param location The target location.
+   * @param constraints Path constraints.
+   * @param parallelCommand The command to run while moving.
+   * @return A ParallelDeadlineGroup containing the pathfinding command and the parallel command.
+   */
+  public Command pathfindToWithHook(
+      Location location, PathConstraints constraints, Command parallelCommand) {
+    return pathfindToWithHook(location.getPose(), constraints, parallelCommand);
+  }
+
+  /**
+   * Generates a command to pathfind to a pose while running another command in parallel. The
+   * parallel command will run until the pathfinding is complete.
+   *
+   * @param targetPose The target pose.
+   * @param parallelCommand The command to run while moving.
+   * @return A ParallelDeadlineGroup containing the pathfinding command and the parallel command.
+   */
+  public Command pathfindToWithHook(Pose2d targetPose, Command parallelCommand) {
+    return pathfindToWithHook(targetPose, PathGenerationConstants.DEFAULT_CONSTRAINTS, parallelCommand);
   }
 
   /**

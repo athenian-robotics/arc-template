@@ -36,7 +36,7 @@ import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
-import frc.robot.util.PathGeneration;
+import frc.robot.Constants.PathGenerationConstants.Location;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -196,12 +196,12 @@ public class RobotContainer {
         .button(ControllerConstants.TRIGGER)
         .whileTrue(
             Commands.runOnce(() -> System.out.println("Running path gen"))
-                .andThen(pathGeneration.pathfindTo(new Pose2d(14.55, 1.0, new Rotation2d()))));
+                .andThen(pathGeneration.pathfindTo(Location.TEST_POSE)));
 
     //Might work better
     driveJoystick
         .button(ControllerConstants.THUMB_BUTTON_RIGHT)
-        .onTrue(pathGeneration.pathfindToSimple(new Pose2d(14.55, 1.0, new Rotation2d())));
+        .onTrue(pathGeneration.pathfindToSimple(Location.TEST_POSE, 0.0));
   }
 
   /**
