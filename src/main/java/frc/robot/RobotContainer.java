@@ -17,6 +17,8 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathfindingCommand;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.measure.Voltage;
+
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -25,9 +27,14 @@ import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.Constants.PathGenerationConstants.Location;
+import frc.robot.Constants.IndexerConstants;
 import frc.robot.Constants.RuntimeConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.Indexer.Indexer;
+import frc.robot.subsystems.Indexer.IndexerIO;
+import frc.robot.subsystems.Indexer.IndexerIOSim;
+import frc.robot.subsystems.Indexer.IndexerIOTalonFX;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -38,6 +45,9 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.util.PathGeneration;
+
+import static edu.wpi.first.units.Units.Volt;
+
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -50,6 +60,7 @@ public class RobotContainer {
   // -- Subsystems --
   private final Drive drive;
   private final Vision vision;
+  private final Indexer indexer;
   private final PathGeneration pathGeneration;
 
   // -- Controllers --
@@ -77,6 +88,7 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
+        indexer = new Indexer(new IndexerIOTalonFX());
         break;
 
       case SIM:
@@ -90,6 +102,7 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
+        indexer = new Indexer(new IndexerIOSim());
         break;
 
       default:
@@ -103,7 +116,7 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
-        break;
+        indexer = new Indexer(new IndexerIO() {});
     }
 
     pathGeneration = new PathGeneration();
