@@ -3,7 +3,9 @@ package frc.robot;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Volt;
+import static edu.wpi.first.units.Units.Volts;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -139,6 +141,43 @@ public class Constants {
     public static final double WHEEL_RADIUS_RAMP_RATE = 0.05; // Rad/Sec^2
   }
 
+  public final class OuttakeConstants {
+    public static final int RIGHT_SHOOTER_MOTOR = -1;
+    public static final int LEFT_SHOOTER_MOTOR = -1;
+    public static final int MIDDLE_WHEEL_MOTOR = -1;
+    public static final int STAR_WHEEL_MOTOR = -1;
+    public static final int ANGLE_CHANGER_MOTOR = -1;
+
+    public static final double MIDDLE_WHEEL_TO_SHOOTER_VOLTS = 2;
+    public static final double MIDDLE_WHEEL_TO_GROUND_VOLTS = -2;
+    public static final double STAR_WHEEL_TO_GROUND_VOLTS = 2;
+    public static final double STAR_WHEEL_TO_SHOOTER_VOLTS = 2;
+    public static final double FLYWHEEL_VOLTS = 12;
+
+    public static final double MINIMUM_SHOT_ANGLE_DEG = 48.782882;
+    public static final double MAXIMUM_SHOT_ANGLE_DEG = 74.552487;
+    public static final double STARTING_SHOT_ANGLE_DEG = 74.552487;
+    public static final double MIDFIELD_SHOT_ANGLE_DEG = 0.0;
+    public static final double OPPOSITE_TEAM_SHOT_ANGLE_DEG = 0.0;
+
+    public static final double MIDFIELD_LIMIT_FEET = 0.0;
+    public static final double OPPOSITE_TEAM_LIMIT_FEET = 0.0;
+
+    public static final double ANGLE_CHANGER_GEAR_RATIO = 1 / 16;
+
+    public static final double HOOD_ANGLE_KP = 0.0;
+    public static final double HOOD_ANGLE_KD = 0.0;
+
+    public static final double ANGLE_CHANGER_STARTING_ANGLE_ROTATIONS = 0.2070902417;
+
+    public static final Translation2d HUB_POSITION = new Translation2d();
+
+    public static final double OUTTAKE_VELOCITY_MPS = 14.5; //based on recalc in slack
+    public static final double GRAVITATIONAL_CONSTANT_MPS2 = 9.8;
+    public static final double HUB_HEIGHT_FEET = 6.0;
+    public static final double LAUNCH_HEIGHT_FEET = 2.5;
+  }
+
   public final class IntakeConstants {
     public static final int TALON_ID = 0;
 
@@ -163,6 +202,7 @@ public class Constants {
     public static final double INTAKE_MAX_ACCELERATION = 0;
     public static final double INTAKE_MAX_ALLOWED_PROFILER_ERROR = 0;
   }
+
   public final class HopperConstants {
     public final static int SPARK_ID = 0;
 

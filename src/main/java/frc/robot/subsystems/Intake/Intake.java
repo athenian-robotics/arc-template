@@ -2,6 +2,7 @@ package frc.robot.subsystems.intake;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.IntakeConstants;
+import frc.robot.subsystems.intake.IntakeIOInputsAutoLogged;
 
 import org.littletonrobotics.junction.Logger;
 
