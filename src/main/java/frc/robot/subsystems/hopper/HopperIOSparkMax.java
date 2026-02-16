@@ -17,10 +17,10 @@ public class HopperIOSparkMax implements HopperIO {
     /** Update the set of loggable inputs */
     @Override
     public void updateInputs(HopperIOInputs inputs) {
-        inputs.hopperMotor_Volts =  hopperMotor.getBusVoltage();
+        inputs.hopperMotor_Volts =  hopperMotor.getBusVoltage() * hopperMotor.getAppliedOutput();
         inputs.hopperMotor_Amps = hopperMotor.getOutputCurrent();
         inputs.hopperExtension_Rotations = hopperEncoder.getPosition();
-        inputs.hopperExtension_Inches = inputs.hopperExtension_Rotations / HopperConstants.HOPPER_POSITION_TO_ANGLE_CONVERSION;
+        inputs.hopperExtension_Inches = hopperEncoder.getPosition() / HopperConstants.HOPPER_POSITION_TO_ANGLE_CONVERSION;
     }
    
     @Override
