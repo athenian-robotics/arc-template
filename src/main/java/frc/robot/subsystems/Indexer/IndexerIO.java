@@ -18,7 +18,4 @@ public interface IndexerIO {
 
     // Runs the indexer at the specified voltage
     public default void setVoltage (double voltage) {}
-
-    /** Toggles the indexer between on and off */
-    public default void toggle () {};
 }

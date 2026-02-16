@@ -29,12 +29,4 @@ public class IndexerIOTalonFX implements IndexerIO {
         appliedVoltage = voltage;
         motor.setControl(new VoltageOut(voltage));
     }
-
-    @Override
-    public void toggle() {
-        double targetVoltage = appliedVoltage == 0 ? IndexerConstants.MOTOR_VOLTAGE : 0; 
-        Logger.recordOutput("Indexer/Voltage", targetVoltage);
-        appliedVoltage = targetVoltage;
-        motor.setControl(new VoltageOut(targetVoltage));
-    }
 }

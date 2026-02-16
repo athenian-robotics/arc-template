@@ -20,12 +20,4 @@ public class IndexerIOSim implements IndexerIO {
         Logger.recordOutput("Indexer/Voltage", voltage);
         appliedVoltage = voltage;
     }
-
-    @Override
-    public void toggle() {
-        double targetVoltage = appliedVoltage == 0 ? IndexerConstants.MOTOR_VOLTAGE : 0; 
-        Logger.recordOutput("Indexer/Voltage", targetVoltage);
-        appliedVoltage = targetVoltage;
-    }
-    
 }
