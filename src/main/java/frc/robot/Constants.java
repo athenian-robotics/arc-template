@@ -2,6 +2,7 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Volt;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.geometry.Translation2d;
@@ -36,6 +37,8 @@ public class Constants {
   }
 
   public final class ControllerConstants {
+    /**Placeholder value to signify that it should be changed later */
+    public static final int PLACEHOLDER = 0;
     // -- Port (identifier) for each individual joystick/controller.
     public static final int JOYSTICK_LEFT_PORT = 0;
     public static final int JOYSTICK_MIDDLE_PORT = 1;
@@ -213,17 +216,23 @@ public class Constants {
     public final static double HOPPER_POSITION_TO_ANGLE_CONVERSION = HOPPER_WINCH_GEAR_RATIO / HOPPER_WINCH_CIRCUMFRENCE;
    
   
-//feedback constants
+    //feedback constants
     public final static double HOPPER_kP = 0;
     public final static double HOPPER_kI = 0;
     public final static double HOPPER_kD = 0;
-//feedforward constants
+    //feedforward constants
     public final static double HOPPER_kS = 0;
     public final static double HOPPER_kV = 0;
     public final static double HOPPER_kA = 0;
-//motion profiler constants
+    //motion profiler constants
     public final static double HOPPER_CRUISE_VELOCITY = 0;
     public final static double HOPPER_MAX_ACCELERATION = 0;
     public final static double HOPPER_MAX_ALLOWED_PROFILER_ERROR = 0;
+
+  }
+
+  public final class IndexerConstants {
+    public static final int MOTOR_ID = 1;
+    public static final double MOTOR_VOLTAGE = 3;
   }
 }
