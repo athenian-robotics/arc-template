@@ -7,14 +7,25 @@ import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import edu.wpi.first.units.measure.LinearVelocity;
 
+/** 
+ * A helper class to manage swapping between TunerConstants for different robots.
+ * To add new TunerConstants:
+ * (1) create a file in the tunerconstants folder named "TunerConstants" + robotName with the pasted TunerConstants from Phoenix Tuner X.
+ * (2) add to the {@link RobotTune} enum with the name of the robot and the class of the file you created in step 1.
+ * (3) whenever you need to change robots
+ */
 public class TunerConstantsHelper {
-  enum Robot {
+    /** 
+     * An enum representing the robot being used. 
+     * Instructions: {@link TunerConstantsHelper}
+     */
+  public enum RobotTune {
     FLOUNDER(TunerConstantsFlounder.class),
     PROGBOT(TunerConstantsProgbot.class);
 
     private final Class<?> file;
 
-    private Robot(Class<?> file) {
+    private RobotTune(Class<?> file) {
       this.file = file;
     }
 
@@ -23,9 +34,14 @@ public class TunerConstantsHelper {
     }
   }
 
-  /** The current robot, needs to be manually set at {@link TunerConstantsHelper#CURRENT_ROBOT} */
-  public static final Robot CURRENT_ROBOT = Robot.FLOUNDER;
+  /** The current robot, needs to be manually set at {@link frc.robot.Constants.RuntimeConstants#CURRENT_ROBOT} */
+  public static final RobotTune CURRENT_ROBOT = RobotTune.FLOUNDER;
 
+  /**
+   * Gets the static object from the current robot TunerConstants while catching exceptions
+   * @param field the name of the static field
+   * @return the Object from the field 
+   */
   private static Object getStaticField(String field) {
     try {
       return CURRENT_ROBOT.getFileClass().getField(field).get(null);
@@ -34,6 +50,7 @@ public class TunerConstantsHelper {
     }
   }
 
+  /* Initialize the TunerConstants fields */
   public static final CANBus kCANBus = (CANBus) getStaticField("kCanBus");
 
   public static final LinearVelocity kSpeedAt12Volts =

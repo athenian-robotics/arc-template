@@ -10,6 +10,8 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.RobotBase;
 
+import frc.robot.tunerconstants.TunerConstantsHelper.RobotTune;
+
 public class Constants {
   /**
    * This class defines the runtime mode used by AdvantageKit. The mode is always "real" when
@@ -17,6 +19,9 @@ public class Constants {
    * "replay" (log replay from a file).
    */
   public class RuntimeConstants {
+    /** The {@link RobotTune} for the current robot */
+    public static final RobotTune CURRENT_ROBOT = RobotTune.FLOUNDER;
+
     public static final Mode simMode = Mode.SIM;
     public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
 
