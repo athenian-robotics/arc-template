@@ -14,9 +14,11 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.commands.PathfindingCommand;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.measure.Voltage;
+
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -24,6 +26,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.ControllerConstants;
+import frc.robot.Constants.PathGenerationConstants.Location;
+import frc.robot.Constants.IndexerConstants;
 import frc.robot.Constants.RuntimeConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.drive.Drive;
@@ -36,6 +40,10 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.tunerconstants.TunerConstantsHelper;
+import frc.robot.util.PathGeneration;
+
+import static edu.wpi.first.units.Units.Volt;
+
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -48,6 +56,8 @@ public class RobotContainer {
   // -- Subsystems --
   private final Drive drive;
   private final Vision vision;
+  private final Indexer indexer;
+  private final PathGeneration pathGeneration;
 
   // -- Controllers --
   private final CommandJoystick driveJoystick =
@@ -100,10 +110,10 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
-        break;
+        indexer = new Indexer(new IndexerIO() {});
     }
 
-    Command ppAuto = new PathPlannerAuto("New Auto");
+    pathGeneration = new PathGeneration();
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -136,6 +146,8 @@ public class RobotContainer {
 
     // Configure the button bindings
     configureJoystickBindings();
+
+    PathfindingCommand.warmupCommand().schedule();
   }
 
   /**
@@ -186,6 +198,18 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                     drive)
                 .ignoringDisable(true));
+
+    // Should return the bot to its initial position
+    driveJoystick
+        .button(ControllerConstants.TRIGGER)
+        .whileTrue(
+            Commands.runOnce(() -> System.out.println("Running path gen"))
+                .andThen(pathGeneration.pathfindTo(Location.TEST_POSE)));
+
+    // Might work better
+    driveJoystick
+        .button(ControllerConstants.THUMB_BUTTON_RIGHT)
+        .onTrue(pathGeneration.pathfindToSimple(drive::getPose, Location.TEST_POSE, 0.0));
   }
 
   /**

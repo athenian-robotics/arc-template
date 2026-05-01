@@ -1,0 +1,188 @@
+package frc.robot.subsystems.outtake;
+
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.DegreesPerSecond;
+import static edu.wpi.first.units.Units.Feet;
+
+import java.util.OptionalDouble;
+
+import org.littletonrobotics.junction.Logger;
+
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.DoubleEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.OuttakeConstants;
+
+public class OuttakeIOTalonFX extends SubsystemBase implements OuttakeIO {
+  private final TalonFX leadShooter, followShooter, middleWheel, starWheel, angleChanger;
+  private final OuttakeIOInputs logs;
+
+  private double targetShotAngleDeg = OuttakeConstants.STARTING_SHOT_ANGLE_DEG;
+
+  private double currentAngleDeg = 0.0;
+  private double currentAngularVelocityDegPerSecond = 0.0;
+  private double targetHeightOffsetMeters = 0.0;
+  private double targetDistanceMeters = 0.0;
+
+  private DoubleEntry hoodAngleDegEntry;
+
+  public OuttakeIOTalonFX() {
+    super();
+
+    hoodAngleDegEntry = NetworkTableInstance.getDefault().getDoubleTopic("/Outtake/HoodAngleDeg").getEntry(OuttakeConstants.MAXIMUM_SHOT_ANGLE_DEG);
+
+    logs = new OuttakeIOInputs();
+    followShooter = new TalonFX(OuttakeConstants.LEFT_SHOOTER_MOTOR);
+    leadShooter = new TalonFX(OuttakeConstants.RIGHT_SHOOTER_MOTOR);
+
+    followShooter.setControl(
+        new Follower(OuttakeConstants.RIGHT_SHOOTER_MOTOR, MotorAlignmentValue.Opposed));
+    
+    leadShooter.getConfigurator().apply(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Coast)); // To make re-spinning up faster
+    middleWheel = new TalonFX(OuttakeConstants.MIDDLE_WHEEL_MOTOR);
+    starWheel = new TalonFX(OuttakeConstants.STAR_WHEEL_MOTOR);
+    angleChanger = new TalonFX(OuttakeConstants.ANGLE_CHANGER_MOTOR);
+
+    // Represents the starting position of the hood
+    angleChanger.setPosition(OuttakeConstants.ANGLE_CHANGER_STARTING_ANGLE_ROTATIONS / OuttakeConstants.ANGLE_CHANGER_GEAR_RATIO);
+    currentAngleDeg = OuttakeConstants.ANGLE_CHANGER_STARTING_ANGLE_ROTATIONS * 360;
+  }
+
+  public void periodic() {
+    // Update the current angle by getting the motor position and multiplying by gear ratio
+    currentAngleDeg = angleChanger.getPosition().getValue().in(Degrees) * OuttakeConstants.ANGLE_CHANGER_GEAR_RATIO;
+    // Update the current angular velocity by getting the motor velocity and multiplying by gear ratio
+    currentAngularVelocityDegPerSecond = angleChanger.getVelocity().getValue().in(DegreesPerSecond) * OuttakeConstants.ANGLE_CHANGER_GEAR_RATIO;
+
+    // Calculate the angle error from target position to actual position
+    double angleError = targetShotAngleDeg - currentAngleDeg;
+    double angularVelocityError = 0 - currentAngularVelocityDegPerSecond;
+
+    // PID logic
+    double appliedVoltage = (angleError * OuttakeConstants.HOOD_ANGLE_KP) + (angularVelocityError * OuttakeConstants.HOOD_ANGLE_KD);
+    Logger.recordOutput("Outtake/AngleVoltage", appliedVoltage);
+
+    angleChanger.setControl(new VoltageOut(appliedVoltage));
+  }
+
+  /**
+   * Calculates how to aim the shooter to hit a target.
+   *
+   * @param currentPosition the position to aim from
+   * @param targetPosition the position to aim at
+   * @return the angle in degrees required to shoot into the hub from its location as an optional double
+   */
+  public OptionalDouble calculateAngle(Translation2d currentPosition, Translation2d targetPosition) {
+    // The height offset from the robot hood to the target in meters because metric is better
+    targetHeightOffsetMeters = Units.feetToMeters(OuttakeConstants.HUB_HEIGHT_FEET - OuttakeConstants.LAUNCH_HEIGHT_FEET);
+    // The outtake velocity it meters per second
+    double velocity = OuttakeConstants.OUTTAKE_VELOCITY_MPS;
+    // The gravitational constant of 9.8 m/s^2
+    double gravity = OuttakeConstants.GRAVITATIONAL_CONSTANT_MPS2;
+    // The horizontal part of the distance between the robot and the target
+    targetDistanceMeters = currentPosition.getDistance(targetPosition);
+    
+    // These are renamed to make the math look smaller
+    double height = targetHeightOffsetMeters;
+    double distance = targetDistanceMeters;
+    
+    // If distance is zero there will (might?) be a division by zero
+    if (distance == 0) return OptionalDouble.empty();
+    
+    // ~Math~
+
+    // This code is unreadable right now so use this   V V V
+    // a_{ngle}=\arctan\left(\frac{\left(v^{2}+\sqrt{v^{4}-g\left(gd^{2}+2hv^{2}\right)}\right)}{gd}\right)
+    // PASTE INTO DESMOS TO VIEW                       ^ ^ ^
+
+    // The discriminant is useful for telling how many solutions there are
+    double discriminant = 
+      Math.pow(velocity, 4) 
+      - ((Math.pow(gravity, 2) * Math.pow(distance, 2))
+      + (2 * gravity * height * Math.pow(velocity, 2))
+    );
+    
+    // If discriminant isn't squareroot-able, then there are no solutions,
+    // meaning no shot is possible. 
+    if (discriminant < 0) return OptionalDouble.empty(); 
+
+    // The rest of the math
+    double angle = Math.atan(
+      (Math.pow(velocity, 2) + Math.sqrt(discriminant)) 
+      / (gravity * distance)
+    );
+
+    return OptionalDouble.of(angle / (2*Math.PI) * 360);
+  }
+
+  @Override
+  public void updateInputs(OuttakeIOInputs inputs) {
+    // Inputs for IO logging
+    inputs.currentShotAngleDegrees = currentAngleDeg;
+    inputs.currentAngularVelocityDegPerSecond = currentAngularVelocityDegPerSecond;
+    inputs.targetShotAngleDegrees = targetShotAngleDeg;
+    inputs.targetDistanceFeet = Units.metersToFeet(targetDistanceMeters);
+  }
+
+  public void startFlywheel() {
+    leadShooter.setControl(new VoltageOut(OuttakeConstants.FLYWHEEL_VOLTS));
+    Logger.recordOutput("Outtake/FlywheelVoltage", leadShooter.getMotorVoltage().getValue());
+  }
+
+  public void stopFlywheel() {
+    leadShooter.set(0.0);
+    Logger.recordOutput("Outtake/FlywheelVoltage", 0.0);
+  }
+
+  public void setMiddleWheelVoltage(double voltage) {
+    middleWheel.setControl(new VoltageOut(voltage));
+    Logger.recordOutput("Outtake/MiddleWheelVoltage", voltage);
+  }
+
+  public void setStarWheelVoltage(double voltage) {
+    starWheel.setControl(new VoltageOut(voltage));
+    Logger.recordOutput("Outtake/StarWheelVoltage", voltage);
+  }
+
+  public void setAngleAtTarget(Translation2d currentPosition) {
+    if (currentPosition.getMeasureX().in(Feet) > OuttakeConstants.OPPOSITE_TEAM_LIMIT_FEET) {
+      targetShotAngleDeg = OuttakeConstants.OPPOSITE_TEAM_SHOT_ANGLE_DEG;
+      return;
+    } 
+    if (currentPosition.getMeasureX().in(Feet) > OuttakeConstants.MIDFIELD_LIMIT_FEET) {
+      targetShotAngleDeg = OuttakeConstants.MIDFIELD_SHOT_ANGLE_DEG;
+      return;
+    }
+    
+    // TODO: check in with drive team if we should try shot next update/tick if angle is empty
+    // TODO: figure out how to account for blueside/redside when integrating this with pose estimation
+    calculateAngle(currentPosition, OuttakeConstants.HUB_POSITION)
+      .ifPresent(this::setAngle);
+  }
+
+  public void setAngle(double angleDegrees) {
+    if (OuttakeConstants.MINIMUM_SHOT_ANGLE_DEG > angleDegrees 
+     || OuttakeConstants.MAXIMUM_SHOT_ANGLE_DEG < angleDegrees) {
+      System.out.println("setAngle was passed an invalid angle");
+      return;
+    }
+    
+    hoodAngleDegEntry.set(angleDegrees);
+
+    targetShotAngleDeg = angleDegrees;
+  }
+
+  @Override
+  public void setAngleFromNT() {
+    setAngle(hoodAngleDegEntry.get());
+  }
+}
