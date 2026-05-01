@@ -1,0 +1,1 @@
+This branch is unlikely to ever be used, but is there if we ever want to use [Yet Another General Swerve Library](https://docs.yagsl.com/) instead of [Cross The Road Electronics](https://v6.docs.ctr-electronics.com/en/latest/index.html) for swerve
