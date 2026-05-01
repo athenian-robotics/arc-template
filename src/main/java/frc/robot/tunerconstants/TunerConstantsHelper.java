@@ -6,6 +6,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import edu.wpi.first.units.measure.LinearVelocity;
+import frc.robot.Constants.RuntimeConstants;
 
 /** 
  * A helper class to manage swapping between TunerConstants for different robots.
@@ -20,8 +21,7 @@ public class TunerConstantsHelper {
      * Instructions: {@link TunerConstantsHelper}
      */
   public enum RobotTune {
-    FLOUNDER(TunerConstantsFlounder.class),
-    PROGBOT(TunerConstantsProgbot.class);
+    PROGBOT(TunerConstantsProgbot.class); //Progbot can be used as an example
 
     private final Class<?> file;
 
@@ -34,9 +34,6 @@ public class TunerConstantsHelper {
     }
   }
 
-  /** The current robot, needs to be manually set at {@link frc.robot.Constants.RuntimeConstants#CURRENT_ROBOT} */
-  public static final RobotTune CURRENT_ROBOT = RobotTune.FLOUNDER;
-
   /**
    * Gets the static object from the current robot TunerConstants while catching exceptions
    * @param field the name of the static field
@@ -44,9 +41,9 @@ public class TunerConstantsHelper {
    */
   private static Object getStaticField(String field) {
     try {
-      return CURRENT_ROBOT.getFileClass().getField(field).get(null);
+      return RuntimeConstants.CURRENT_ROBOT.getFileClass().getField(field).get(null);
     } catch (Exception e) {
-      throw new RuntimeException("Failed to load " + field + " from " + CURRENT_ROBOT.name(), e);
+      throw new RuntimeException("Failed to load " + field + " from " + RuntimeConstants.CURRENT_ROBOT.name(), e);
     }
   }
 
@@ -59,7 +56,7 @@ public class TunerConstantsHelper {
   public static final SwerveDrivetrainConstants DrivetrainConstants =
       (SwerveDrivetrainConstants) getStaticField("DrivetrainConstants");
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("unchecked") //doesn't like assertion of type SwerveModuleConstants<...> because it can't be implied
   public static final SwerveModuleConstants<
           TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>
       FrontLeft =

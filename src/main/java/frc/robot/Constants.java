@@ -28,7 +28,7 @@ public class Constants {
    */
   public class RuntimeConstants {
     /** The {@link RobotTune} for the current robot */
-    public static final RobotTune CURRENT_ROBOT = RobotTune.FLOUNDER;
+    public static final RobotTune CURRENT_ROBOT = RobotTune.PROGBOT;
 
     public static final Mode simMode = Mode.SIM;
     public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
