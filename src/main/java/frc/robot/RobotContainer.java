@@ -56,7 +56,6 @@ public class RobotContainer {
   // -- Subsystems --
   private final Drive drive;
   private final Vision vision;
-  private final Indexer indexer;
   private final PathGeneration pathGeneration;
 
   // -- Controllers --
@@ -110,7 +109,7 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
-        indexer = new Indexer(new IndexerIO() {});
+     
     }
 
     pathGeneration = new PathGeneration();
