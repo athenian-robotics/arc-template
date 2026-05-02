@@ -13,7 +13,7 @@ import frc.robot.Constants.RuntimeConstants;
  * To add new TunerConstants:
  * (1) create a file in the tunerconstants folder named "TunerConstants" + robotName with the pasted TunerConstants from Phoenix Tuner X.
  * (2) add to the {@link RobotTune} enum with the name of the robot and the class of the file you created in step 1.
- * (3) whenever you need to change robots
+ * (3) whenever you need to change robots, change {@link RuntimeConstants#CURRENT_ROBOT} to the corresponding RobotTune
  */
 public class TunerConstantsHelper {
     /** 
