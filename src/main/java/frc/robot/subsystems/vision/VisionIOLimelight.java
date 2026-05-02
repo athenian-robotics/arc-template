@@ -3,13 +3,10 @@ package frc.robot.subsystems.vision;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.Constants;
 import frc.robot.LimelightHelpers;
 import frc.robot.LimelightHelpers.PoseEstimate;
 import frc.robot.LimelightHelpers.RawFiducial;
-import java.util.Optional;
 
 public class VisionIOLimelight implements VisionIO {
 
@@ -89,24 +86,23 @@ public class VisionIOLimelight implements VisionIO {
   }
 
   /**
-   * Samples the alliance-specific pose estimate from the Limelight.
+   * Samples the pose estimate from the Limelight.
    *
    * <p>MegaTag2 support can be toggled via {@code useMegaTag2}.
    */
   private PoseEstimate sampleEstimate() {
-    Optional<Alliance> alliance = DriverStation.getAlliance();
+    // IMPORTANT:
+    // Keep the robot's pose estimator in a single, consistent field coordinate system.
+    // This project uses the WPI "blue alliance origin" convention for odometry and relies on
+    // PathPlanner's built-in alliance flipping for autos. That means Limelight measurements must
+    // also be in the WPI-blue frame, regardless of current alliance.
+    //
+    // Using wpired on red will occasionally "teleport" the robot pose across the field whenever a
+    // vision measurement is accepted, which matches the intermittent map/vision failures reported.
     // Use MegaTag1 for stability if MegaTag2 is glitchy.
     // Switch to MegaTag2 once gyro sync is verified and stable.
     boolean useMegaTag2 = false;
 
-    if (alliance.isPresent() && alliance.get() == Alliance.Red) {
-      if (useMegaTag2) {
-        return LimelightHelpers.getBotPoseEstimate_wpiRed_MegaTag2(
-            Constants.LimelightConstants.CAMERA_NAME);
-      } else {
-        return LimelightHelpers.getBotPoseEstimate_wpiRed(Constants.LimelightConstants.CAMERA_NAME);
-      }
-    }
     if (useMegaTag2) {
       return LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(
           Constants.LimelightConstants.CAMERA_NAME);
