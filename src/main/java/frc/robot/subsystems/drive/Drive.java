@@ -87,7 +87,7 @@ public class Drive extends SubsystemBase {
           new ModuleConfig(
               TunerConstantsHelper.FrontLeft.WheelRadius,
               TunerConstantsHelper.kSpeedAt12Volts.in(MetersPerSecond),
-              WHEEL_COF,
+              DrivetrainConstants.WHEEL_COF, 
               DCMotor.getKrakenX60Foc(1)
                   .withReduction(TunerConstantsHelper.FrontLeft.DriveMotorGearRatio),
               TunerConstantsHelper.FrontLeft.SlipCurrent,

@@ -2,8 +2,6 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.Volt;
-import static edu.wpi.first.units.Units.Volts;
 
 import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -13,11 +11,8 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
-import frc.robot.generated.TunerConstants;
-
+import frc.robot.tunerconstants.TunerConstantsHelper;
 import frc.robot.tunerconstants.TunerConstantsHelper.RobotTune;
 
 public class Constants {
@@ -269,7 +264,7 @@ public class Constants {
 
     // Default constraints for pathfinding
     // Adjust these based on your robot's capabilities
-    public static final double MAX_VELOCITY = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
+    public static final double MAX_VELOCITY = TunerConstantsHelper.kSpeedAt12Volts.in(MetersPerSecond);
     public static final double MAX_ACCELERATION = 7.9;
     public static final double MAX_ANGULAR_VELOCITY =
         MAX_VELOCITY / Math.sqrt(Math.pow(0.273, 2) * 2);
