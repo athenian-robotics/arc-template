@@ -17,7 +17,6 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathfindingCommand;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.units.measure.Voltage;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -27,10 +26,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.Constants.PathGenerationConstants.Location;
-import frc.robot.Constants.IndexerConstants;
 import frc.robot.Constants.RuntimeConstants;
 import frc.robot.commands.DriveCommands;
-import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -40,9 +37,8 @@ import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
+import frc.robot.tunerconstants.TunerConstantsHelper;
 import frc.robot.util.PathGeneration;
-
-import static edu.wpi.first.units.Units.Volt;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -79,11 +75,10 @@ public class RobotContainer {
             new Drive(
                 vision,
                 new GyroIOPigeon2(),
-                new ModuleIOTalonFX(TunerConstants.FrontLeft),
-                new ModuleIOTalonFX(TunerConstants.FrontRight),
-                new ModuleIOTalonFX(TunerConstants.BackLeft),
-                new ModuleIOTalonFX(TunerConstants.BackRight));
-        
+                new ModuleIOTalonFX(TunerConstantsHelper.FrontLeft),
+                new ModuleIOTalonFX(TunerConstantsHelper.FrontRight),
+                new ModuleIOTalonFX(TunerConstantsHelper.BackLeft),
+                new ModuleIOTalonFX(TunerConstantsHelper.BackRight));
         break;
 
       case SIM:
@@ -93,11 +88,10 @@ public class RobotContainer {
             new Drive(
                 vision,
                 new GyroIO() {},
-                new ModuleIOSim(TunerConstants.FrontLeft),
-                new ModuleIOSim(TunerConstants.FrontRight),
-                new ModuleIOSim(TunerConstants.BackLeft),
-                new ModuleIOSim(TunerConstants.BackRight));
- 
+                new ModuleIOSim(TunerConstantsHelper.FrontLeft),
+                new ModuleIOSim(TunerConstantsHelper.FrontRight),
+                new ModuleIOSim(TunerConstantsHelper.BackLeft),
+                new ModuleIOSim(TunerConstantsHelper.BackRight));
         break;
 
       default:
