@@ -1,6 +1,6 @@
 {
     "name": "WPILib 2026",
-    "image": "ghcr.io/athenian-robotics/arc-devcontainer:2027.0.0-alpha-7",
+    "image": "ghcr.io/athenian-robotics/arc-devcontainer:2026",
     "customizations": {
         "vscode": {
             "settings": {
