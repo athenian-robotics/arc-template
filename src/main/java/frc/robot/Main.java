@@ -13,7 +13,6 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.RobotBase;
 
 /**
  * Do NOT add any static variables to this class, or any initialization at all. Unless you know what
@@ -23,12 +22,13 @@ import edu.wpi.first.wpilibj.RobotBase;
 public final class Main {
   private Main() {}
 
-  /**
-   * Main initialization function. Do not perform any initialization here.
-   *
-   * <p>If you change your main robot class, change the parameter type.
-   */
   public static void main(String... args) {
-    RobotBase.startRobot(Robot::new);
+    
+  }
+
+  // Convert speed in meters per second to a voltage for this hypothetical motor. If 
+  // more than maximum volts are provided, then it should be the maximum.
+  static double speedToVolts(double velocity_m_s) {
+    return 0.0;
   }
 }
