@@ -1,0 +1,30 @@
+{
+    "name": "WPILib 2026",
+    "image": "ghcr.io/athenian-robotics/arc-devcontainer:2027.0.0-alpha-7",
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "java.home": "/home/vscode/wpilib/2026/jdk",
+                "java.import.gradle.java.home": "/home/vscode/wpilib/2026/jdk",
+                "java.configuration.runtimes": [
+                    {
+                        "name": "JavaSE-24",
+                        "path": "/home/vscode/wpilib/2026/jdk",
+                        "default": true
+                    }
+                ],
+                "terminal.integrated.env.linux": {
+                    "JAVA_HOME": "/home/vscode/wpilib/2026/jdk"
+                }
+            },
+            "extensions": [
+                "vscjava.vscode-java-pack"
+            ]
+        }
+    },
+    "postCreateCommand": "code --install-extension /home/vscode/wpilib/vscode-wpilib.vsix",
+    "remoteUser": "vscode",
+    "features": {
+        "ghcr.io/stuartleeks/dev-container-features/shell-history:0": {}
+    }
+}
