@@ -12,6 +12,7 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
+import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.tunerconstants.TunerConstantsHelper;
 import frc.robot.tunerconstants.TunerConstantsHelper.RobotTune;
 
@@ -100,7 +101,7 @@ public class Constants {
     public static final double WHEEL_COF = 1.2;
   }
 
-  public static final class LimelightConstants {
+  public static final class VisionConstants {
     /** NetworkTables name configured on the camera. */
     public static final String CAMERA_NAME = "limelight";
 
@@ -109,7 +110,7 @@ public class Constants {
      */
     public static final Transform3d ROBOT_TO_CAMERA =
         new Transform3d(
-            new Translation3d(Inches.of(0.0), Inches.of(0.0), Inches.of(7.5)),
+            new Translation3d(Inches.of(0.0), Inches.of(0.0), Inches.of(7.5)), //Position where the limelight is (x,y,z)
             new Rotation3d(0.0, Units.degreesToRadians(28.1), 0.0));
     // TODO: update to the final measured translation/rotation from robot origin to camera.
 
@@ -158,6 +159,11 @@ public class Constants {
      * but then vision will be rejected again. 
      */
     public static final int SEQUENTIAL_OVERRIDES = 5;
+
+    // Use MegaTag1 for stability if MegaTag2 is glitchy.
+    // Switch to MegaTag2 once gyro sync is verified and stable.
+    /** {@link VisionIOLimelight#sampleEstimate} */
+    public static final boolean USE_MEGA_TAG_2 = false;
   }
 
   public final class DriveCommandsConstants {

@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.util.OptionalDouble;
 import frc.robot.Constants;
 import frc.robot.LimelightHelpers;
-import frc.robot.Constants.LimelightConstants;
+import frc.robot.Constants.VisionConstants;
 import frc.robot.LimelightHelpers.RawFiducial;
 import org.littletonrobotics.junction.Logger;
 
@@ -80,7 +80,7 @@ public class Vision extends SubsystemBase {
    * @return The latest vision observation if valid and (optionally) matches the estimate.
    */
   public Optional<VisionObservation> getVisionObservation(Pose2d currentPose) {
-    if (!hasFreshObservation(Constants.LimelightConstants.FRESH_OBSERVATION_THRESHOLD)) {
+    if (!hasFreshObservation(Constants.VisionConstants.FRESH_OBSERVATION_THRESHOLD)) {
       Logger.recordOutput("Vision/HasFreshObservation", false);
       sequentialRejections = 0;
       return Optional.empty();
@@ -95,7 +95,7 @@ public class Vision extends SubsystemBase {
     Logger.recordOutput("Vision/SequentialRejections", sequentialRejections);
 
     boolean bypassOdometryCheck = overrideOdometry || currentPose == null 
-      || sequentialRejections > LimelightConstants.MAX_SEQUENTIAL_REJECTIONS || remainingOverrides > 0;
+      || sequentialRejections > VisionConstants.MAX_SEQUENTIAL_REJECTIONS || remainingOverrides > 0;
     Logger.recordOutput("Vision/OdometryCheckBypassed", bypassOdometryCheck);
 
     if (!bypassOdometryCheck
@@ -116,7 +116,7 @@ public class Vision extends SubsystemBase {
     // re-enable normal gating to prevent large frame-mismatch teleports.
     if (overrideOdometry) {
       overrideOdometry = false;
-      remainingOverrides = LimelightConstants.SEQUENTIAL_OVERRIDES;
+      remainingOverrides = VisionConstants.SEQUENTIAL_OVERRIDES;
     }
 
     return Optional.of(latestObservation);
@@ -141,7 +141,7 @@ public class Vision extends SubsystemBase {
    */
   public OptionalDouble getDistanceToTag(int tagNumber) {
     RawFiducial[] fiducials =
-        LimelightHelpers.getRawFiducials(Constants.LimelightConstants.CAMERA_NAME);
+        LimelightHelpers.getRawFiducials(Constants.VisionConstants.CAMERA_NAME);
     for (RawFiducial fiducial : fiducials) {
       if (fiducial.id == tagNumber) {
         return OptionalDouble.of(fiducial.distToRobot);
@@ -154,9 +154,9 @@ public class Vision extends SubsystemBase {
   private boolean measurementMatchesOdometry(Pose2d reference, Pose2d measurement) {
     Translation2d delta = reference.getTranslation().minus(measurement.getTranslation());
     Rotation2d rotationDelta = reference.getRotation().minus(measurement.getRotation());
-    return delta.getNorm() <= Constants.LimelightConstants.MAX_TRANSLATION_ERROR_METERS
+    return delta.getNorm() <= Constants.VisionConstants.MAX_TRANSLATION_ERROR_METERS
         && Math.abs(rotationDelta.getRadians())
-            <= Constants.LimelightConstants.MAX_ROTATION_ERROR_RADIANS;
+            <= Constants.VisionConstants.MAX_ROTATION_ERROR_RADIANS;
   }
 
   /** Determines whether a cached observation is still recent enough to use. */
@@ -173,8 +173,8 @@ public class Vision extends SubsystemBase {
    * @return true when the raw vision inputs meet the configured thresholds.
    */
   private boolean isEstimateUsable(VisionIOInputsAutoLogged inputs) {
-    return (inputs.tagCount >= Constants.LimelightConstants.MIN_TAG_COUNT
-        && inputs.avgAmbiguity <= Constants.LimelightConstants.MAX_POSE_AMBIGUITY);
+    return (inputs.tagCount >= Constants.VisionConstants.MIN_TAG_COUNT
+        && inputs.avgAmbiguity <= Constants.VisionConstants.MAX_POSE_AMBIGUITY);
   }
 
   public void setOverrideOdometry(boolean value) {

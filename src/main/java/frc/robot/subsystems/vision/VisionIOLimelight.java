@@ -5,31 +5,32 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
 import frc.robot.LimelightHelpers;
+import frc.robot.Constants.VisionConstants;
 import frc.robot.LimelightHelpers.PoseEstimate;
 import frc.robot.LimelightHelpers.RawFiducial;
 
 public class VisionIOLimelight implements VisionIO {
 
   public VisionIOLimelight() {
-    Translation3d translation = Constants.LimelightConstants.ROBOT_TO_CAMERA.getTranslation();
-    Rotation3d rotation = Constants.LimelightConstants.ROBOT_TO_CAMERA.getRotation();
+    Translation3d translation = Constants.VisionConstants.ROBOT_TO_CAMERA.getTranslation();
+    Rotation3d rotation = Constants.VisionConstants.ROBOT_TO_CAMERA.getRotation();
     LimelightHelpers.setCameraPose_RobotSpace(
-        Constants.LimelightConstants.CAMERA_NAME,
+        Constants.VisionConstants.CAMERA_NAME,
         translation.getX(),
         translation.getY(),
         translation.getZ(),
         Units.radiansToDegrees(rotation.getX()),
         Units.radiansToDegrees(rotation.getY()),
         Units.radiansToDegrees(rotation.getZ()));
-    LimelightHelpers.setPipelineIndex(Constants.LimelightConstants.CAMERA_NAME, 0);
+    LimelightHelpers.setPipelineIndex(Constants.VisionConstants.CAMERA_NAME, 0);
   }
 
   /** Samples the Limelight network table to populate the loggable inputs. */
   @Override
   public void updateInputs(VisionIOInputs inputs) {
-    inputs.hasTarget = LimelightHelpers.getTV(Constants.LimelightConstants.CAMERA_NAME);
+    inputs.hasTarget = LimelightHelpers.getTV(Constants.VisionConstants.CAMERA_NAME);
     inputs.heartbeat =
-        LimelightHelpers.getLimelightNTDouble(Constants.LimelightConstants.CAMERA_NAME, "hb");
+        LimelightHelpers.getLimelightNTDouble(Constants.VisionConstants.CAMERA_NAME, "hb");
 
     PoseEstimate estimate = sampleEstimate();
     if (estimate == null || estimate.pose == null) {
@@ -60,16 +61,16 @@ public class VisionIOLimelight implements VisionIO {
   // Convenience wrappers for future commands.
   @Override
   public void setPipeline(int index) {
-    LimelightHelpers.setPipelineIndex(Constants.LimelightConstants.CAMERA_NAME, index);
+    LimelightHelpers.setPipelineIndex(Constants.VisionConstants.CAMERA_NAME, index);
   }
 
   /** Toggles the Limelight LEDs. */
   @Override
   public void setLedEnabled(boolean enabled) {
     if (enabled) {
-      LimelightHelpers.setLEDMode_ForceOn(Constants.LimelightConstants.CAMERA_NAME);
+      LimelightHelpers.setLEDMode_ForceOn(Constants.VisionConstants.CAMERA_NAME);
     } else {
-      LimelightHelpers.setLEDMode_ForceOff(Constants.LimelightConstants.CAMERA_NAME);
+      LimelightHelpers.setLEDMode_ForceOff(Constants.VisionConstants.CAMERA_NAME);
     }
   }
 
@@ -82,7 +83,7 @@ public class VisionIOLimelight implements VisionIO {
   @Override
   public void setRobotOrientation(double yaw, double yawRate) {
     LimelightHelpers.SetRobotOrientation_NoFlush(
-        Constants.LimelightConstants.CAMERA_NAME, yaw, yawRate, 0, 0, 0, 0);
+        Constants.VisionConstants.CAMERA_NAME, yaw, yawRate, 0, 0, 0, 0);
   }
 
   /**
@@ -101,13 +102,12 @@ public class VisionIOLimelight implements VisionIO {
     // vision measurement is accepted, which matches the intermittent map/vision failures reported.
     // Use MegaTag1 for stability if MegaTag2 is glitchy.
     // Switch to MegaTag2 once gyro sync is verified and stable.
-    boolean useMegaTag2 = false;
 
-    if (useMegaTag2) {
+    if (VisionConstants.USE_MEGA_TAG_2) {
       return LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(
-          Constants.LimelightConstants.CAMERA_NAME);
+          Constants.VisionConstants.CAMERA_NAME);
     } else {
-      return LimelightHelpers.getBotPoseEstimate_wpiBlue(Constants.LimelightConstants.CAMERA_NAME);
+      return LimelightHelpers.getBotPoseEstimate_wpiBlue(Constants.VisionConstants.CAMERA_NAME);
     }
   }
 
@@ -140,23 +140,23 @@ public class VisionIOLimelight implements VisionIO {
             ? 1.0 // Happens if Limelight cannot compute a reliable range from the inputs.
             : Math.max(
                 1.0,
-                estimate.avgTagDist / Constants.LimelightConstants.DISTANCE_TRUST_FALLOFF_METERS);
+                estimate.avgTagDist / Constants.VisionConstants.DISTANCE_TRUST_FALLOFF_METERS);
 
     // Feels like this line shouldn't do anything but it might for some reason
     // Math.max(1.0, estimate.avgTagDist /
     // Constants.LimelightConstants.DISTANCE_TRUST_FALLOFF_METERS);
 
     double xyStd =
-        Constants.LimelightConstants.SINGLE_TAG_XY_STDDEV
+        Constants.VisionConstants.SINGLE_TAG_XY_STDDEV
             * distanceFactor
             / Math.min(3.0, tagCountFactor);
     double thetaStd =
-        Constants.LimelightConstants.SINGLE_TAG_THETA_STDDEV
+        Constants.VisionConstants.SINGLE_TAG_THETA_STDDEV
             * distanceFactor
             / Math.min(2.5, tagCountFactor);
 
-    xyStd = Math.max(Constants.LimelightConstants.MIN_XY_STDDEV, xyStd);
-    thetaStd = Math.max(Constants.LimelightConstants.MIN_THETA_STDDEV, thetaStd);
+    xyStd = Math.max(Constants.VisionConstants.MIN_XY_STDDEV, xyStd);
+    thetaStd = Math.max(Constants.VisionConstants.MIN_THETA_STDDEV, thetaStd);
 
     return new MeasurementNoise(xyStd, thetaStd);
   }
