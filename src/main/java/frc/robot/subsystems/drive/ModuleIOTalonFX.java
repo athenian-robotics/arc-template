@@ -40,6 +40,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
+import frc.robot.Constants;
 import frc.robot.tunerconstants.TunerConstantsHelper;
 import java.util.Queue;
 
@@ -109,8 +110,12 @@ public class ModuleIOTalonFX implements ModuleIO {
     driveConfig.Feedback.SensorToMechanismRatio = constants.DriveMotorGearRatio;
     driveConfig.TorqueCurrent.PeakForwardTorqueCurrent = constants.SlipCurrent;
     driveConfig.TorqueCurrent.PeakReverseTorqueCurrent = -constants.SlipCurrent;
-    driveConfig.CurrentLimits.StatorCurrentLimit = constants.SlipCurrent;
+    driveConfig.CurrentLimits.StatorCurrentLimit = Constants.DRIVE_CURRENT_LIMITS.StatorCurrentLimit;
     driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+    driveConfig.CurrentLimits.SupplyCurrentLimit = Constants.DRIVE_CURRENT_LIMITS.SupplyCurrentLimit;
+    driveConfig.CurrentLimits.SupplyCurrentLowerLimit = Constants.DRIVE_CURRENT_LIMITS.SupplyCurrentLowerLimit;
+    driveConfig.CurrentLimits.SupplyCurrentLowerTime = Constants.DRIVE_CURRENT_LIMITS.SupplyCurrentLowerTime;
+    driveConfig.CurrentLimits.SupplyCurrentLimitEnable = Constants.DRIVE_CURRENT_LIMITS.SupplyCurrentLimitEnable;
     driveConfig.MotorOutput.Inverted =
         constants.DriveMotorInverted
             ? InvertedValue.Clockwise_Positive

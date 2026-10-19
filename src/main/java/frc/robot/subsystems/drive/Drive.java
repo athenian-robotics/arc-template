@@ -43,19 +43,21 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.Constants.RuntimeConstants;
-import frc.robot.subsystems.vision.Vision;
 import frc.robot.tunerconstants.TunerConstantsHelper;
+import frc.robot.subsystems.vision.Vision;
+import frc.robot.util.AllianceUtil;
 import frc.robot.util.LocalADStarAK;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -66,18 +68,11 @@ public class Drive extends SubsystemBase {
   public static final double DRIVE_BASE_RADIUS =
       Math.max(
           Math.max(
-              Math.hypot(
-                  TunerConstantsHelper.FrontLeft.LocationX,
-                  TunerConstantsHelper.FrontLeft.LocationY),
-              Math.hypot(
-                  TunerConstantsHelper.FrontRight.LocationX,
-                  TunerConstantsHelper.FrontRight.LocationY)),
+              Math.hypot(TunerConstantsHelper.FrontLeft.LocationX, TunerConstantsHelper.FrontLeft.LocationY),
+              Math.hypot(TunerConstantsHelper.FrontRight.LocationX, TunerConstantsHelper.FrontRight.LocationY)),
           Math.max(
-              Math.hypot(
-                  TunerConstantsHelper.BackLeft.LocationX, TunerConstantsHelper.BackLeft.LocationY),
-              Math.hypot(
-                  TunerConstantsHelper.BackRight.LocationX,
-                  TunerConstantsHelper.BackRight.LocationY)));
+              Math.hypot(TunerConstantsHelper.BackLeft.LocationX, TunerConstantsHelper.BackLeft.LocationY),
+              Math.hypot(TunerConstantsHelper.BackRight.LocationX, TunerConstantsHelper.BackRight.LocationY)));
 
   // PathPlanner config constants
   private static final RobotConfig PP_CONFIG =
@@ -87,7 +82,7 @@ public class Drive extends SubsystemBase {
           new ModuleConfig(
               TunerConstantsHelper.FrontLeft.WheelRadius,
               TunerConstantsHelper.kSpeedAt12Volts.in(MetersPerSecond),
-              DrivetrainConstants.WHEEL_COF, 
+              DrivetrainConstants.WHEEL_COF,
               DCMotor.getKrakenX60Foc(1)
                   .withReduction(TunerConstantsHelper.FrontLeft.DriveMotorGearRatio),
               TunerConstantsHelper.FrontLeft.SlipCurrent,
@@ -115,7 +110,12 @@ public class Drive extends SubsystemBase {
       };
   private SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
+
   private final Field2d field = new Field2d();
+
+  // Driver-only heading offset for "field oriented" driving. This must not affect odometry or
+  // vision; it only changes how joystick inputs are interpreted.
+  private Rotation2d driverHeadingOffset = new Rotation2d();
 
   public Drive(
       Vision vision,
@@ -146,7 +146,7 @@ public class Drive extends SubsystemBase {
         new PPHolonomicDriveController(
             new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
         PP_CONFIG,
-        () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
+        AllianceUtil::isRedAlliance,
         this);
     Pathfinding.setPathfinder(new LocalADStarAK());
     PathPlannerLogging.setLogActivePathCallback(
@@ -183,6 +183,7 @@ public class Drive extends SubsystemBase {
                 (voltage) -> runRotateCharacterization(voltage.in(Volts)),
                 (log) -> rotateSysIdLog(log),
                 this));
+    SmartDashboard.putData(field);
   }
 
   @Override
@@ -276,8 +277,7 @@ public class Drive extends SubsystemBase {
     // Calculate module setpoints
     ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
     SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
-    SwerveDriveKinematics.desaturateWheelSpeeds(
-        setpointStates, TunerConstantsHelper.kSpeedAt12Volts);
+    SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, TunerConstantsHelper.kSpeedAt12Volts);
 
     // Log unoptimized setpoints and setpoint speeds
     Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
@@ -355,7 +355,14 @@ public class Drive extends SubsystemBase {
     stop();
   }
 
-  /** Returns a command to run a quasistatic drive test in the specified direction. */
+  /** Returns a command to run a quasistatic drive test in the specified direction. 
+   * HOW TO USE: get feedforwards from SysId program
+   * and transform kV from wheel meters to motor rotations by dividing wheel radius, 2pi, and gear ratio. 
+   * Do the divisions twice for kA because the control unit is squared there.
+   * Put an average of those feedforwards and the rotate feedforwards in to DriveGains in TunerConstants, 
+   * because we don't have a smarter way of handling it.
+   * Remember to also keep the non-averaged values for calculating rotational inertia (Moment of Inertia).
+   */
   public Command sysIdQuasistaticDrive(SysIdRoutine.Direction direction) {
     return run(() -> runDriveCharacterization(0.0))
         .withTimeout(1.0)
@@ -369,7 +376,14 @@ public class Drive extends SubsystemBase {
         .andThen(sysIdDrive.dynamic(direction));
   }
 
-  /** Returns a command to run a quasistatic rotate test in the specified direction. */
+  /** Returns a command to run a quasistatic rotate test in the specified direction.
+   * HOW TO USE: get feedforwards from SysId program
+   * and transform kV from wheel meters to motor rotations by dividing wheel radius, 2pi, and gear ratio. 
+   * Do the divisions twice for kA because the control unit is squared there.
+   * Put an average of those feedforwards and the rotate feedforwards in to DriveGains in TunerConstants, 
+   * because we don't have a smarter way of handling it.
+   * Remember to also keep the non-averaged values for calculating rotational inertia (Moment of Inertia).
+   * THIS IS NOT FOR STEERGAINS */
   public Command sysIdQuasistaticRotate(SysIdRoutine.Direction direction) {
     return run(() -> runRotateCharacterization(0.0))
         .withTimeout(1.0)
@@ -437,6 +451,19 @@ public class Drive extends SubsystemBase {
     return getPose().getRotation();
   }
 
+  /** Returns the rotation used for field-relative driving (odometry rotation minus driver offset). */
+  public Rotation2d getDriverFieldRelativeRotation() {
+    return getRotation().minus(driverHeadingOffset);
+  }
+
+  /**
+   * Sets the driver-only heading so that the robot's current pose rotation is treated as the given
+   * desired heading for field-relative driving.
+   */
+  public void setDriverFieldRelativeHeading(Rotation2d desiredHeading) {
+    driverHeadingOffset = getRotation().minus(desiredHeading);
+  }
+
   /** Resets the current odometry pose. */
   public void setPose(Pose2d pose) {
     poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
@@ -464,14 +491,16 @@ public class Drive extends SubsystemBase {
   /** Returns an array of module translations. */
   public static Translation2d[] getModuleTranslations() {
     return new Translation2d[] {
-      new Translation2d(
-          TunerConstantsHelper.FrontLeft.LocationX, TunerConstantsHelper.FrontLeft.LocationY),
-      new Translation2d(
-          TunerConstantsHelper.FrontRight.LocationX, TunerConstantsHelper.FrontRight.LocationY),
-      new Translation2d(
-          TunerConstantsHelper.BackLeft.LocationX, TunerConstantsHelper.BackLeft.LocationY),
-      new Translation2d(
-          TunerConstantsHelper.BackRight.LocationX, TunerConstantsHelper.BackRight.LocationY)
+      new Translation2d(TunerConstantsHelper.FrontLeft.LocationX, TunerConstantsHelper.FrontLeft.LocationY),
+      new Translation2d(TunerConstantsHelper.FrontRight.LocationX, TunerConstantsHelper.FrontRight.LocationY),
+      new Translation2d(TunerConstantsHelper.BackLeft.LocationX, TunerConstantsHelper.BackLeft.LocationY),
+      new Translation2d(TunerConstantsHelper.BackRight.LocationX, TunerConstantsHelper.BackRight.LocationY)
     };
+  }
+
+  public Command findMaxSpeed() {
+    return run(() -> {
+      runDriveCharacterization(12);
+    });
   }
 }
