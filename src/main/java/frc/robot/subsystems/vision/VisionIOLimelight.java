@@ -5,7 +5,7 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import frc.robot.Constants;
+import frc.robot.constants.VisionSensor;
 import frc.robot.LimelightHelpers;
 import frc.robot.LimelightHelpers.PoseEstimate;
 import frc.robot.LimelightHelpers.RawFiducial;
@@ -14,25 +14,25 @@ import java.util.Optional;
 public class VisionIOLimelight implements VisionIO {
 
   public VisionIOLimelight() {
-    Translation3d translation = Constants.LimelightConstants.ROBOT_TO_CAMERA.getTranslation();
-    Rotation3d rotation = Constants.LimelightConstants.ROBOT_TO_CAMERA.getRotation();
+    Translation3d translation = VisionSensor.ROBOT_TO_CAMERA.getTranslation();
+    Rotation3d rotation = VisionSensor.ROBOT_TO_CAMERA.getRotation();
     LimelightHelpers.setCameraPose_RobotSpace(
-        Constants.LimelightConstants.CAMERA_NAME,
+        VisionSensor.NAME,
         translation.getX(),
         translation.getY(),
         translation.getZ(),
         Units.radiansToDegrees(rotation.getX()),
         Units.radiansToDegrees(rotation.getY()),
         Units.radiansToDegrees(rotation.getZ()));
-    LimelightHelpers.setPipelineIndex(Constants.LimelightConstants.CAMERA_NAME, 0);
+    LimelightHelpers.setPipelineIndex(VisionSensor.NAME, 0);
   }
 
   /** Samples the Limelight network table to populate the loggable inputs. */
   @Override
   public void updateInputs(VisionIOInputs inputs) {
-    inputs.hasTarget = LimelightHelpers.getTV(Constants.LimelightConstants.CAMERA_NAME);
+    inputs.hasTarget = LimelightHelpers.getTV(VisionSensor.NAME);
     inputs.heartbeat =
-        LimelightHelpers.getLimelightNTDouble(Constants.LimelightConstants.CAMERA_NAME, "hb");
+        LimelightHelpers.getLimelightNTDouble(VisionSensor.NAME, "hb");
 
     PoseEstimate estimate = sampleEstimate();
     if (estimate == null || estimate.pose == null) {
@@ -63,16 +63,16 @@ public class VisionIOLimelight implements VisionIO {
   // Convenience wrappers for future commands.
   @Override
   public void setPipeline(int index) {
-    LimelightHelpers.setPipelineIndex(Constants.LimelightConstants.CAMERA_NAME, index);
+    LimelightHelpers.setPipelineIndex(VisionSensor.NAME, index);
   }
 
   /** Toggles the Limelight LEDs. */
   @Override
   public void setLedEnabled(boolean enabled) {
     if (enabled) {
-      LimelightHelpers.setLEDMode_ForceOn(Constants.LimelightConstants.CAMERA_NAME);
+      LimelightHelpers.setLEDMode_ForceOn(VisionSensor.NAME);
     } else {
-      LimelightHelpers.setLEDMode_ForceOff(Constants.LimelightConstants.CAMERA_NAME);
+      LimelightHelpers.setLEDMode_ForceOff(VisionSensor.NAME);
     }
   }
 
@@ -85,7 +85,7 @@ public class VisionIOLimelight implements VisionIO {
   @Override
   public void setRobotOrientation(double yaw, double yawRate) {
     LimelightHelpers.SetRobotOrientation_NoFlush(
-        Constants.LimelightConstants.CAMERA_NAME, yaw, yawRate, 0, 0, 0, 0);
+        VisionSensor.NAME, yaw, yawRate, 0, 0, 0, 0);
   }
 
   /**
@@ -102,16 +102,16 @@ public class VisionIOLimelight implements VisionIO {
     if (alliance.isPresent() && alliance.get() == Alliance.Red) {
       if (useMegaTag2) {
         return LimelightHelpers.getBotPoseEstimate_wpiRed_MegaTag2(
-            Constants.LimelightConstants.CAMERA_NAME);
+            VisionSensor.NAME);
       } else {
-        return LimelightHelpers.getBotPoseEstimate_wpiRed(Constants.LimelightConstants.CAMERA_NAME);
+        return LimelightHelpers.getBotPoseEstimate_wpiRed(VisionSensor.NAME);
       }
     }
     if (useMegaTag2) {
       return LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(
-          Constants.LimelightConstants.CAMERA_NAME);
+          VisionSensor.NAME);
     } else {
-      return LimelightHelpers.getBotPoseEstimate_wpiBlue(Constants.LimelightConstants.CAMERA_NAME);
+      return LimelightHelpers.getBotPoseEstimate_wpiBlue(VisionSensor.NAME);
     }
   }
 
@@ -144,23 +144,23 @@ public class VisionIOLimelight implements VisionIO {
             ? 1.0 // Happens if Limelight cannot compute a reliable range from the inputs.
             : Math.max(
                 1.0,
-                estimate.avgTagDist / Constants.LimelightConstants.DISTANCE_TRUST_FALLOFF_METERS);
+                estimate.avgTagDist / VisionSensor.DISTANCE_TRUST_FALLOFF);
 
     // Feels like this line shouldn't do anything but it might for some reason
     // Math.max(1.0, estimate.avgTagDist /
-    // Constants.LimelightConstants.DISTANCE_TRUST_FALLOFF_METERS);
+    // VisionSensor.DISTANCE_TRUST_FALLOFF_METERS);
 
     double xyStd =
-        Constants.LimelightConstants.SINGLE_TAG_XY_STDDEV
+        VisionSensor.SINGLE_TAG_XY_STDDEV
             * distanceFactor
             / Math.min(3.0, tagCountFactor);
     double thetaStd =
-        Constants.LimelightConstants.SINGLE_TAG_THETA_STDDEV
+        VisionSensor.SINGLE_TAG_THETA_STDDEV
             * distanceFactor
             / Math.min(2.5, tagCountFactor);
 
-    xyStd = Math.max(Constants.LimelightConstants.MIN_XY_STDDEV, xyStd);
-    thetaStd = Math.max(Constants.LimelightConstants.MIN_THETA_STDDEV, thetaStd);
+    xyStd = Math.max(VisionSensor.MIN_XY_STDDEV, xyStd);
+    thetaStd = Math.max(VisionSensor.MIN_THETA_STDDEV, thetaStd);
 
     return new MeasurementNoise(xyStd, thetaStd);
   }

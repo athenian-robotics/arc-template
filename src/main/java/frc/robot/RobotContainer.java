@@ -24,9 +24,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.Constants.ControllerConstants;
+import frc.robot.constants.Controller;
 import frc.robot.Constants.PathGenerationConstants.Location;
-import frc.robot.Constants.RuntimeConstants;
+import frc.robot.constants.Robot.RuntimeConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
@@ -56,11 +56,11 @@ public class RobotContainer {
 
   // -- Controllers --
   private final CommandJoystick driveJoystick =
-      new CommandJoystick(ControllerConstants.JOYSTICK_LEFT_PORT);
+      new CommandJoystick(Controller.LEFT_JOYSTICK_PORT);
   private final CommandJoystick steerJoystick =
-      new CommandJoystick(ControllerConstants.JOYSTICK_MIDDLE_PORT);
+      new CommandJoystick(Controller.MIDDLE_JOYSTICK_PORT);
   private final CommandJoystick operatorJoystick =
-      new CommandJoystick(ControllerConstants.JOYSTICK_RIGHT_PORT);
+      new CommandJoystick(Controller.RIGHT_JOYSTICK_PORT);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -68,44 +68,39 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     switch (RuntimeConstants.currentMode) {
-      case REAL:
-        // Real robot, instantiate hardware IO implementations
+      case REAL: // Real robot, instantiate hardware IO implementations
         vision = new Vision(new VisionIOLimelight());
-        drive =
-            new Drive(
-                vision,
-                new GyroIOPigeon2(),
-                new ModuleIOTalonFX(TunerConstantsHelper.FrontLeft),
-                new ModuleIOTalonFX(TunerConstantsHelper.FrontRight),
-                new ModuleIOTalonFX(TunerConstantsHelper.BackLeft),
-                new ModuleIOTalonFX(TunerConstantsHelper.BackRight));
+        drive = new Drive(
+            vision,
+            new GyroIOPigeon2(),
+            new ModuleIOTalonFX(TunerConstantsHelper.FrontLeft),
+            new ModuleIOTalonFX(TunerConstantsHelper.FrontRight),
+            new ModuleIOTalonFX(TunerConstantsHelper.BackLeft),
+            new ModuleIOTalonFX(TunerConstantsHelper.BackRight));
         break;
 
       case SIM:
         // Sim robot, instantiate physics sim IO implementations
         vision = new Vision(new VisionIO() {});
-        drive =
-            new Drive(
-                vision,
-                new GyroIO() {},
-                new ModuleIOSim(TunerConstantsHelper.FrontLeft),
-                new ModuleIOSim(TunerConstantsHelper.FrontRight),
-                new ModuleIOSim(TunerConstantsHelper.BackLeft),
-                new ModuleIOSim(TunerConstantsHelper.BackRight));
+        drive = new Drive(
+            vision,
+            new GyroIO() {},
+            new ModuleIOSim(TunerConstantsHelper.FrontLeft),
+            new ModuleIOSim(TunerConstantsHelper.FrontRight),
+            new ModuleIOSim(TunerConstantsHelper.BackLeft),
+            new ModuleIOSim(TunerConstantsHelper.BackRight));
         break;
 
       default:
         // Replayed robot, disable IO implementations
         vision = new Vision(new VisionIO() {});
-        drive =
-            new Drive(
-                vision,
-                new GyroIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {});
-     
+        drive = new Drive(
+            vision,
+            new GyroIO() {},
+            new ModuleIO() {},
+            new ModuleIO() {},
+            new ModuleIO() {},
+            new ModuleIO() {});
     }
 
     pathGeneration = new PathGeneration();
@@ -114,6 +109,75 @@ public class RobotContainer {
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
     // Set up SysId routines
+    addSysIds();
+
+    // Configure the button bindings
+    configureJoystickBindings();
+
+    PathfindingCommand.warmupCommand().schedule();
+  }
+
+  /**
+   * Use this method to define your button->command mappings. Buttons can be created by
+   * instantiating a {@link GenericHID} or one of its subclasses ({@link
+   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
+   * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
+   */
+  private void configureJoystickBindings() {
+    // Default command, normal field-relative drive
+    drive.setDefaultCommand(
+        Controller.IS_HEADING_BASED_DRIVE
+        ?
+            DriveCommands.joystickDriveAtAngle(
+                drive,
+                () -> driveJoystick.getY(),
+                () -> driveJoystick.getX(),
+                () -> new Rotation2d(-steerJoystick.getY(), -steerJoystick.getX()),
+                () -> steerJoystick.getMagnitude() >= Controller.HEADING_DEADZONE
+            )
+        :
+            DriveCommands.joystickDrive(
+                drive,
+                () -> -driveJoystick.getY(),
+                () -> -driveJoystick.getX(),
+                () -> -steerJoystick.getX()
+            )
+        );
+
+    // Reset gyro to 0°
+    steerJoystick
+        .button(Controller.UNBOUND)
+        .onTrue(
+            Commands.runOnce(
+                () -> drive.setPose(new Pose2d(drive.getPose().getTranslation(), new Rotation2d())), 
+                drive)
+            .ignoringDisable(true)
+        );
+
+    /*-----The following code is untested-----*/
+    // Should return the bot to its initial position
+    driveJoystick
+        .button(Controller.UNBOUND)
+        .whileTrue(
+            Commands.runOnce(() -> System.out.println("Running path gen"))
+                .andThen(pathGeneration.pathfindTo(Location.TEST_POSE)));
+
+    // Might work better
+    driveJoystick
+        .button(Controller.UNBOUND)
+        .onTrue(pathGeneration.pathfindToSimple(drive::getPose, Location.TEST_POSE, 0.0));
+  }
+
+  /**
+   * Use this to pass the autonomous command to the main {@link Robot} class.
+   *
+   * @return the command to run in autonomous
+   */
+  public Command getAutonomousCommand() {
+    return autoChooser.get();
+  }
+
+  private void addSysIds() {
     autoChooser.addOption(
         "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
     autoChooser.addOption(
@@ -138,81 +202,5 @@ public class RobotContainer {
         "Turn SysId (Dynamic Forward)", drive.sysIdDynamicRotate(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Turn SysId (Dynamic Reverse)", drive.sysIdDynamicRotate(SysIdRoutine.Direction.kReverse));
-
-    // Configure the button bindings
-    configureJoystickBindings();
-
-    PathfindingCommand.warmupCommand().schedule();
-  }
-
-  /**
-   * Use this method to define your button->command mappings. Buttons can be created by
-   * instantiating a {@link GenericHID} or one of its subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
-   * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
-   */
-  private void configureJoystickBindings() {
-    // Default command, normal field-relative drive
-    drive.setDefaultCommand(
-        DriveCommands.joystickDrive(
-            drive,
-            () -> -driveJoystick.getY(),
-            () -> -driveJoystick.getX(),
-            () -> -steerJoystick.getX()));
-
-    // This allows for heading-based drive
-    // drive.setDefaultCommand(
-    //     DriveCommands.joystickDriveAtAngle(
-    //         drive,
-    //         () -> driveJoystick.getY(),
-    //         () -> driveJoystick.getX(),
-    //         () -> new Rotation2d(-steerJoystick.getY(), -steerJoystick.getX()),
-    //         () -> steerJoystick.getMagnitude() >=
-    // Constants.ControllerConstants.HEADING_DEADZONE));
-
-    // // Lock to 0° when A button is held
-    // controller
-    //     .a()
-    //     .whileTrue(
-    //         DriveCommands.joystickDriveAtAngle(
-    //             drive,
-    //             () -> -controller.getLeftY(),
-    //             () -> -controller.getLeftX(),
-    //             () -> new Rotation2d()));
-
-    // // Switch to X pattern when X button is pressed
-    // controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
-
-    // Reset gyro to 0° when B button is pressed
-    steerJoystick
-        .button(ControllerConstants.TRIGGER)
-        .onTrue(
-            Commands.runOnce(
-                    () ->
-                        drive.setPose(
-                            new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
-                    drive)
-                .ignoringDisable(true));
-
-    // Should return the bot to its initial position
-    driveJoystick
-        .button(ControllerConstants.TRIGGER)
-        .whileTrue(
-            Commands.runOnce(() -> System.out.println("Running path gen"))
-                .andThen(pathGeneration.pathfindTo(Location.TEST_POSE)));
-
-    // Might work better
-    driveJoystick
-        .button(ControllerConstants.THUMB_BUTTON_RIGHT)
-        .onTrue(pathGeneration.pathfindToSimple(drive::getPose, Location.TEST_POSE, 0.0));
-  }
-
-  /**
-   * Use this to pass the autonomous command to the main {@link Robot} class.
-   *
-   * @return the command to run in autonomous
-   */
-  public Command getAutonomousCommand() {
-    return autoChooser.get();
   }
 }

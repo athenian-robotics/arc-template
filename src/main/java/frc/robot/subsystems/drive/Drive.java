@@ -49,8 +49,8 @@ import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.Constants.DrivetrainConstants;
-import frc.robot.Constants.RuntimeConstants;
+import frc.robot.constants.Robot;
+import frc.robot.constants.Robot.RuntimeConstants;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.tunerconstants.TunerConstantsHelper;
 import frc.robot.util.LocalADStarAK;
@@ -82,12 +82,12 @@ public class Drive extends SubsystemBase {
   // PathPlanner config constants
   private static final RobotConfig PP_CONFIG =
       new RobotConfig(
-          DrivetrainConstants.ROBOT_MASS_KG,
-          DrivetrainConstants.ROBOT_MOI,
+          Robot.MASS,
+          Robot.MOI,
           new ModuleConfig(
               TunerConstantsHelper.FrontLeft.WheelRadius,
               TunerConstantsHelper.kSpeedAt12Volts.in(MetersPerSecond),
-              DrivetrainConstants.WHEEL_COF, 
+              Robot.WHEEL_COF, 
               DCMotor.getKrakenX60Foc(1)
                   .withReduction(TunerConstantsHelper.FrontLeft.DriveMotorGearRatio),
               TunerConstantsHelper.FrontLeft.SlipCurrent,
