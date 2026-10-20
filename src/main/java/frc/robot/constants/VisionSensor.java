@@ -47,7 +47,7 @@ public final class VisionSensor {
     public static final double SINGLE_TAG_XY_STDDEV = 0.45;
 
     /**
-     * Baseline standard deviations <b><i>(radians)</i></b> for measurements that only use a single tag. Multi-tag
+     * Baseline standard deviations <b><i>(rad)</i></b> for measurements that only use a single tag. Multi-tag
      * solves will scale these values down dynamically. Adjusted based on heading noise.
      */
     public static final double SINGLE_TAG_THETA_STDDEV = Units.degreesToRadians(7.5);
@@ -59,7 +59,7 @@ public final class VisionSensor {
     public static final double MIN_XY_STDDEV = 0.05; 
 
     /** 
-     * Floor for the best possible standard deviation <b><i>(radians)</i></b>. 
+     * Floor for the best possible standard deviation <b><i>(rad)</i></b>. 
      * Prevents unrealistically low heading noise. 
      */
     public static final double MIN_THETA_STDDEV = Units.degreesToRadians(2.0);
@@ -76,7 +76,7 @@ public final class VisionSensor {
     public static final double MAX_TRANSLATION_ERROR = 2.0;
 
     /**
-     * Maximum allowed rotation error <b><i>(radians)</i></b> between vision and odometry before rejecting data.
+     * Maximum allowed rotation error <b><i>(rad)</i></b> between vision and odometry before rejecting data.
      */
     public static final double MAX_ROTATION_ERROR = Units.degreesToRadians(30.0);
 
