@@ -4,7 +4,7 @@
     "customizations": {
         "vscode": {
             "settings": {
-                "java.home": "/home/vscode/wpilib/2026/jdk",
+                "java.jdt.ls.java.home": "/home/vscode/wpilib/2026/jdk",
                 "java.import.gradle.java.home": "/home/vscode/wpilib/2026/jdk",
                 "java.configuration.runtimes": [
                     {
@@ -18,11 +18,11 @@
                 }
             },
             "extensions": [
-                "vscjava.vscode-java-pack"
+                "vscjava.vscode-java-pack",
+                "/home/vscode/wpilib/vscode-wpilib.vsix"
             ]
         }
     },
-    "postCreateCommand": "code --install-extension /home/vscode/wpilib/vscode-wpilib.vsix",
     "remoteUser": "vscode",
     "features": {
         "ghcr.io/stuartleeks/dev-container-features/shell-history:0": {}
