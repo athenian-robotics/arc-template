@@ -6,7 +6,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.constants.VisionSensor;
+import frc.robot.constants.VisionConstants;
 import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 
@@ -73,7 +73,7 @@ public class Vision extends SubsystemBase {
    * @return The latest vision observation if valid and (optionally) matches the estimate.
    */
   public Optional<VisionObservation> getVisionObservation(Pose2d currentPose) {
-    if (!hasFreshObservation(VisionSensor.FRESH_OBSERVATION_THRESHOLD)) {
+    if (!hasFreshObservation(VisionConstants.FRESH_OBSERVATION_THRESHOLD)) {
       Logger.recordOutput("Vision/HasFreshObservation", false);
       return Optional.empty();
     }
@@ -116,9 +116,9 @@ public class Vision extends SubsystemBase {
   private boolean measurementMatchesOdometry(Pose2d reference, Pose2d measurement) {
     Translation2d delta = reference.getTranslation().minus(measurement.getTranslation());
     Rotation2d rotationDelta = reference.getRotation().minus(measurement.getRotation());
-    return delta.getNorm() <= VisionSensor.MAX_TRANSLATION_ERROR
+    return delta.getNorm() <= VisionConstants.MAX_TRANSLATION_ERROR
         && Math.abs(rotationDelta.getRadians())
-            <= VisionSensor.MAX_ROTATION_ERROR;
+            <= VisionConstants.MAX_ROTATION_ERROR;
   }
 
   /** Determines whether a cached observation is still recent enough to use. */
@@ -133,8 +133,8 @@ public class Vision extends SubsystemBase {
    * @return true when the raw vision inputs meet the configured thresholds.
    */
   private boolean isEstimateUsable(VisionIOInputsAutoLogged inputs) {
-    return (inputs.tagCount >= VisionSensor.MIN_TAG_COUNT
-        && inputs.avgAmbiguity <= VisionSensor.MAX_POSE_AMBIGUITY);
+    return (inputs.tagCount >= VisionConstants.MIN_TAG_COUNT
+        && inputs.avgAmbiguity <= VisionConstants.MAX_POSE_AMBIGUITY);
   }
 
   public void setOverrideOdometry(boolean value) {

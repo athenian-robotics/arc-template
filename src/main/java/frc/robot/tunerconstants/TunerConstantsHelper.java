@@ -6,7 +6,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import edu.wpi.first.units.measure.LinearVelocity;
-import frc.robot.constants.Robot;
+import frc.robot.constants.RobotConstants;
 
 /** 
  * A helper class to manage swapping between TunerConstants for different robots.
@@ -41,9 +41,9 @@ public class TunerConstantsHelper {
    */
   private static Object getStaticField(String field) {
     try {
-      return Robot.CURRENT_ROBOT.getFileClass().getField(field).get(null);
+      return RobotConstants.CURRENT_ROBOT.getFileClass().getField(field).get(null);
     } catch (Exception e) {
-      throw new RuntimeException("Failed to load " + field + " from " + Robot.CURRENT_ROBOT.name(), e);
+      throw new RuntimeException("Failed to load " + field + " from " + RobotConstants.CURRENT_ROBOT.name(), e);
     }
   }
 

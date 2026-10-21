@@ -5,7 +5,7 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import frc.robot.constants.VisionSensor;
+import frc.robot.constants.VisionConstants;
 import frc.robot.LimelightHelpers;
 import frc.robot.LimelightHelpers.PoseEstimate;
 import frc.robot.LimelightHelpers.RawFiducial;
@@ -14,25 +14,25 @@ import java.util.Optional;
 public class VisionIOLimelight implements VisionIO {
 
   public VisionIOLimelight() {
-    Translation3d translation = VisionSensor.ROBOT_TO_CAMERA.getTranslation();
-    Rotation3d rotation = VisionSensor.ROBOT_TO_CAMERA.getRotation();
+    Translation3d translation = VisionConstants.ROBOT_TO_CAMERA.getTranslation();
+    Rotation3d rotation = VisionConstants.ROBOT_TO_CAMERA.getRotation();
     LimelightHelpers.setCameraPose_RobotSpace(
-        VisionSensor.NAME,
+        VisionConstants.NAME,
         translation.getX(),
         translation.getY(),
         translation.getZ(),
         Units.radiansToDegrees(rotation.getX()),
         Units.radiansToDegrees(rotation.getY()),
         Units.radiansToDegrees(rotation.getZ()));
-    LimelightHelpers.setPipelineIndex(VisionSensor.NAME, 0);
+    LimelightHelpers.setPipelineIndex(VisionConstants.NAME, 0);
   }
 
   /** Samples the Limelight network table to populate the loggable inputs. */
   @Override
   public void updateInputs(VisionIOInputs inputs) {
-    inputs.hasTarget = LimelightHelpers.getTV(VisionSensor.NAME);
+    inputs.hasTarget = LimelightHelpers.getTV(VisionConstants.NAME);
     inputs.heartbeat =
-        LimelightHelpers.getLimelightNTDouble(VisionSensor.NAME, "hb");
+        LimelightHelpers.getLimelightNTDouble(VisionConstants.NAME, "hb");
 
     PoseEstimate estimate = sampleEstimate();
     if (estimate == null || estimate.pose == null) {
@@ -63,16 +63,16 @@ public class VisionIOLimelight implements VisionIO {
   // Convenience wrappers for future commands.
   @Override
   public void setPipeline(int index) {
-    LimelightHelpers.setPipelineIndex(VisionSensor.NAME, index);
+    LimelightHelpers.setPipelineIndex(VisionConstants.NAME, index);
   }
 
   /** Toggles the Limelight LEDs. */
   @Override
   public void setLedEnabled(boolean enabled) {
     if (enabled) {
-      LimelightHelpers.setLEDMode_ForceOn(VisionSensor.NAME);
+      LimelightHelpers.setLEDMode_ForceOn(VisionConstants.NAME);
     } else {
-      LimelightHelpers.setLEDMode_ForceOff(VisionSensor.NAME);
+      LimelightHelpers.setLEDMode_ForceOff(VisionConstants.NAME);
     }
   }
 
@@ -85,7 +85,7 @@ public class VisionIOLimelight implements VisionIO {
   @Override
   public void setRobotOrientation(double yaw, double yawRate) {
     LimelightHelpers.SetRobotOrientation_NoFlush(
-        VisionSensor.NAME, yaw, yawRate, 0, 0, 0, 0);
+        VisionConstants.NAME, yaw, yawRate, 0, 0, 0, 0);
   }
 
   /**
@@ -102,16 +102,16 @@ public class VisionIOLimelight implements VisionIO {
     if (alliance.isPresent() && alliance.get() == Alliance.Red) {
       if (useMegaTag2) {
         return LimelightHelpers.getBotPoseEstimate_wpiRed_MegaTag2(
-            VisionSensor.NAME);
+            VisionConstants.NAME);
       } else {
-        return LimelightHelpers.getBotPoseEstimate_wpiRed(VisionSensor.NAME);
+        return LimelightHelpers.getBotPoseEstimate_wpiRed(VisionConstants.NAME);
       }
     }
     if (useMegaTag2) {
       return LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(
-          VisionSensor.NAME);
+          VisionConstants.NAME);
     } else {
-      return LimelightHelpers.getBotPoseEstimate_wpiBlue(VisionSensor.NAME);
+      return LimelightHelpers.getBotPoseEstimate_wpiBlue(VisionConstants.NAME);
     }
   }
 
@@ -144,23 +144,23 @@ public class VisionIOLimelight implements VisionIO {
             ? 1.0 // Happens if Limelight cannot compute a reliable range from the inputs.
             : Math.max(
                 1.0,
-                estimate.avgTagDist / VisionSensor.DISTANCE_TRUST_FALLOFF);
+                estimate.avgTagDist / VisionConstants.DISTANCE_TRUST_FALLOFF);
 
     // Feels like this line shouldn't do anything but it might for some reason
     // Math.max(1.0, estimate.avgTagDist /
     // VisionSensor.DISTANCE_TRUST_FALLOFF_METERS);
 
     double xyStd =
-        VisionSensor.SINGLE_TAG_XY_STDDEV
+        VisionConstants.SINGLE_TAG_XY_STDDEV
             * distanceFactor
             / Math.min(3.0, tagCountFactor);
     double thetaStd =
-        VisionSensor.SINGLE_TAG_THETA_STDDEV
+        VisionConstants.SINGLE_TAG_THETA_STDDEV
             * distanceFactor
             / Math.min(2.5, tagCountFactor);
 
-    xyStd = Math.max(VisionSensor.MIN_XY_STDDEV, xyStd);
-    thetaStd = Math.max(VisionSensor.MIN_THETA_STDDEV, thetaStd);
+    xyStd = Math.max(VisionConstants.MIN_XY_STDDEV, xyStd);
+    thetaStd = Math.max(VisionConstants.MIN_THETA_STDDEV, thetaStd);
 
     return new MeasurementNoise(xyStd, thetaStd);
   }

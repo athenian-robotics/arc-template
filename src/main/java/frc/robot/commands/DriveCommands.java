@@ -29,7 +29,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
-import frc.robot.Constants;
+import frc.robot.constants.DriveCommandsConstants;
 import frc.robot.subsystems.drive.Drive;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -48,7 +48,7 @@ public class DriveCommands {
   private static Translation2d getLinearVelocityFromJoysticks(double x, double y) {
     // Apply deadband
     double linearMagnitude =
-        MathUtil.applyDeadband(Math.hypot(x, y), Constants.DriveCommandsConstants.DEADBAND);
+        MathUtil.applyDeadband(Math.hypot(x, y), DriveCommandsConstants.DEADBAND);
     Rotation2d linearDirection = new Rotation2d(Math.atan2(y, x));
 
     // Square magnitude for more precise control
@@ -77,7 +77,7 @@ public class DriveCommands {
           // Apply rotation deadband
           double omega =
               MathUtil.applyDeadband(
-                  omegaSupplier.getAsDouble(), Constants.DriveCommandsConstants.DEADBAND);
+                  omegaSupplier.getAsDouble(), DriveCommandsConstants.DEADBAND);
 
           // Square rotation value for more precise control
           omega = Math.copySign(omega * omega, omega);
@@ -116,12 +116,12 @@ public class DriveCommands {
     // Create PID controller
     ProfiledPIDController angleController =
         new ProfiledPIDController(
-            Constants.DriveCommandsConstants.ANGLE_KP,
+            DriveCommandsConstants.ANGLE_KP,
             0.0,
-            Constants.DriveCommandsConstants.ANGLE_KD,
+            DriveCommandsConstants.ANGLE_KD,
             new TrapezoidProfile.Constraints(
-                Constants.DriveCommandsConstants.ANGLE_MAX_VELOCITY,
-                Constants.DriveCommandsConstants.ANGLE_MAX_ACCELERATION));
+                DriveCommandsConstants.ANGLE_MAX_VELOCITY,
+                DriveCommandsConstants.ANGLE_MAX_ACCELERATION));
     angleController.enableContinuousInput(-Math.PI, Math.PI);
 
     // Has to override Command to allow statefulness with the command, enabling heading control to
@@ -204,7 +204,7 @@ public class DriveCommands {
                   drive.runDriveCharacterization(0.0);
                 },
                 drive)
-            .withTimeout(Constants.DriveCommandsConstants.FF_START_DELAY),
+            .withTimeout(DriveCommandsConstants.FF_START_DELAY),
 
         // Start timer
         Commands.runOnce(timer::restart),
@@ -212,7 +212,7 @@ public class DriveCommands {
         // Accelerate and gather data
         Commands.run(
                 () -> {
-                  double voltage = timer.get() * Constants.DriveCommandsConstants.FF_RAMP_RATE;
+                  double voltage = timer.get() * DriveCommandsConstants.FF_RAMP_RATE;
                   drive.runDriveCharacterization(voltage);
                   velocitySamples.add(drive.getFFCharacterizationVelocity());
                   voltageSamples.add(voltage);
@@ -246,7 +246,7 @@ public class DriveCommands {
   /** Measures the robot's wheel radius by spinning in a circle. */
   public static Command wheelRadiusCharacterization(Drive drive) {
     SlewRateLimiter limiter =
-        new SlewRateLimiter(Constants.DriveCommandsConstants.WHEEL_RADIUS_RAMP_RATE);
+        new SlewRateLimiter(DriveCommandsConstants.WHEEL_RADIUS_RAMP_RATE);
     WheelRadiusCharacterizationState state = new WheelRadiusCharacterizationState();
 
     return Commands.parallel(
@@ -262,7 +262,7 @@ public class DriveCommands {
             Commands.run(
                 () -> {
                   double speed =
-                      limiter.calculate(Constants.DriveCommandsConstants.WHEEL_RADIUS_MAX_VELOCITY);
+                      limiter.calculate(DriveCommandsConstants.WHEEL_RADIUS_MAX_VELOCITY);
                   drive.runVelocity(new ChassisSpeeds(0.0, 0.0, speed));
                 },
                 drive)),

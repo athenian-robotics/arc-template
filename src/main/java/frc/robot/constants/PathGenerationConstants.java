@@ -9,7 +9,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import frc.robot.tunerconstants.TunerConstantsHelper;
 
-public final class PathGeneration {
+public final class PathGenerationConstants {
     // Predefined locations of interest
     public enum Location {
         TEST_POSE(new Pose2d(14.55, 1.0, new Rotation2d())); // Example coordinates

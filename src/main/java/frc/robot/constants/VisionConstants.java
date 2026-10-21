@@ -7,7 +7,7 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 
-public final class VisionSensor {
+public final class VisionConstants {
     /*-----Tune these values for your robot-----*/
 
     /** Transform from the robot origin (center of rotation on the floor) to the camera position and heading. */

@@ -24,9 +24,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.constants.Controller;
-import frc.robot.Constants.PathGenerationConstants.Location;
-import frc.robot.constants.Robot.RuntimeConstants;
+import frc.robot.constants.OperationConfig;
+import frc.robot.constants.PathGenerationConstants.Location;
+import frc.robot.constants.RobotConstants.RuntimeConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
@@ -56,11 +56,11 @@ public class RobotContainer {
 
   // -- Controllers --
   private final CommandJoystick driveJoystick =
-      new CommandJoystick(Controller.LEFT_JOYSTICK_PORT);
+      new CommandJoystick(OperationConfig.LEFT_JOYSTICK_PORT);
   private final CommandJoystick steerJoystick =
-      new CommandJoystick(Controller.MIDDLE_JOYSTICK_PORT);
+      new CommandJoystick(OperationConfig.MIDDLE_JOYSTICK_PORT);
   private final CommandJoystick operatorJoystick =
-      new CommandJoystick(Controller.RIGHT_JOYSTICK_PORT);
+      new CommandJoystick(OperationConfig.RIGHT_JOYSTICK_PORT);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -126,14 +126,14 @@ public class RobotContainer {
   private void configureJoystickBindings() {
     // Default command, normal field-relative drive
     drive.setDefaultCommand(
-        Controller.IS_HEADING_BASED_DRIVE
+        OperationConfig.IS_HEADING_BASED_DRIVE
         ?
             DriveCommands.joystickDriveAtAngle(
                 drive,
                 () -> driveJoystick.getY(),
                 () -> driveJoystick.getX(),
                 () -> new Rotation2d(-steerJoystick.getY(), -steerJoystick.getX()),
-                () -> steerJoystick.getMagnitude() >= Controller.HEADING_DEADZONE
+                () -> steerJoystick.getMagnitude() >= OperationConfig.HEADING_DEADBAND
             )
         :
             DriveCommands.joystickDrive(
@@ -146,7 +146,7 @@ public class RobotContainer {
 
     // Reset gyro to 0°
     steerJoystick
-        .button(Controller.UNBOUND)
+        .button(OperationConfig.UNBOUND)
         .onTrue(
             Commands.runOnce(
                 () -> drive.setPose(new Pose2d(drive.getPose().getTranslation(), new Rotation2d())), 
@@ -157,14 +157,14 @@ public class RobotContainer {
     /*-----The following code is untested-----*/
     // Should return the bot to its initial position
     driveJoystick
-        .button(Controller.UNBOUND)
+        .button(OperationConfig.UNBOUND)
         .whileTrue(
             Commands.runOnce(() -> System.out.println("Running path gen"))
                 .andThen(pathGeneration.pathfindTo(Location.TEST_POSE)));
 
     // Might work better
     driveJoystick
-        .button(Controller.UNBOUND)
+        .button(OperationConfig.UNBOUND)
         .onTrue(pathGeneration.pathfindToSimple(drive::getPose, Location.TEST_POSE, 0.0));
   }
 

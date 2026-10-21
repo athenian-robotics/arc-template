@@ -3,7 +3,7 @@ package frc.robot.constants;
 import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.tunerconstants.TunerConstantsHelper.RobotTune;
 
-public final class Robot {
+public final class RobotConstants {
     /** The {@link RobotTune} for the current robot */
     public static final RobotTune CURRENT_ROBOT = RobotTune.PROGBOT;
 

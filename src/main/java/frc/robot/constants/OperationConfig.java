@@ -1,11 +1,11 @@
 package frc.robot.constants;
 
-public final class Controller {
+public final class OperationConfig {
     /** Whether drive is based off of the field (bird's eye) or the robot's heading (robot POV) */
     public static final boolean IS_HEADING_BASED_DRIVE = false;
 
     /** Area in which joystick does not register. Prevents twitching when staying still. */
-    public static final double HEADING_DEADZONE = 0.2;
+    public static final double HEADING_DEADBAND = 0.2;
 
     // -- Port (identifier) for each individual joystick/controller plugged into computer.
     public static final int LEFT_JOYSTICK_PORT = 0;
