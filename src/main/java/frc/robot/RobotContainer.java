@@ -168,6 +168,11 @@ public class RobotContainer {
         .onTrue(pathGeneration.pathfindToSimple(drive::getPose, Location.TEST_POSE, 0.0));
   }
 
+  /** A method that runs when the robot is disabled. It turns off all subsystems. */
+  public void disable() {
+
+  }
+
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
